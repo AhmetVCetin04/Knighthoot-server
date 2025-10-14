@@ -1,0 +1,19 @@
+{
+  "name": "knighthoot",
+  "version": "1.0.0",
+  "description": "An opensource recorded, collective test procurement solution for educators to gauge the knowledgebase of their students in an interactive manner ",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JamesDFogarty/COP4331-Large-Project.git"
+  },
+  "author": "COP-4331C fall 2025 group 14",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JamesDFogarty/COP4331-Large-Project/issues"
+  },
+  "homepage": "https://github.com/JamesDFogarty/COP4331-Large-Project#readme"
+}
