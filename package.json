@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/JamesDFogarty/COP4331-Large-Project/issues"
   },
-  "homepage": "https://github.com/JamesDFogarty/COP4331-Large-Project#readme"
+  "homepage": "https://github.com/JamesDFogarty/COP4331-Large-Project#readme",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
 }
