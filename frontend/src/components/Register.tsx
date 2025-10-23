@@ -87,8 +87,7 @@ function Register()
         var js = JSON.stringify(obj);
 		try
 		{
-            js = JSON.stringify({email:"evilsharkeater@gmail.com"});
-			const response = await fetch('http://174.138.73.101:4000/api/email',{method:'POST',body:js,headers:{'Content-Type':'application/json'}});
+			const response = await fetch('http://174.138.73.101:5173/api/register',{method:'POST',body:js,headers:{'Content-Type':'application/json'}});
 
 			var res = JSON.parse(await response.text());
 			
@@ -98,9 +97,9 @@ function Register()
 				}
 				else
 					{
-						// var user =
-						// 	{firstName:res.firstName,lastName:res.lastName,id:res.id,email:res.email};
-						//localStorage.setItem('user_data', JSON.stringify(res));
+						 var user =
+						 	{firstName:res.firstName,lastName:res.lastName,id:res.id,email:res.email};
+						localStorage.setItem('user_data', JSON.stringify(res));
 						setMessage('');
 						window.location.href = '/';
 					}

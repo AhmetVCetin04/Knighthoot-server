@@ -9,6 +9,7 @@
 		"backend": "nodemon server.js",
 		"frontend": "cd frontend && npm run dev -- --host",
 		"dev": "concurrently \"npm run backend\" \"npm run frontend\" "
+		"stop": "pkill -f 'npm run dev' || pkill -f 'vite' || pkill -f 'nodemon' || true"
 	},
 	"author": "",
 	"license": "ISC",
