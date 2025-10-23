@@ -1,0 +1,165 @@
+{
+  "info": {
+    "name": "Knighthoot API",
+    "_postman_id": "e4e6b9b5-ffb4-4c3c-b69b-9c5a6a24db83",
+    "description": "Complete Knighthoot backend API collection for local testing.\nBase URL: http://127.0.0.1:4000",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1️⃣ Register User",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": "{{base_url}}/api/register",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"firstName\": \"Alice\",\n  \"lastName\": \"Smith\",\n  \"username\": \"asmith\",\n  \"password\": \"1234\",\n  \"email\": \"alice@ucf.edu\",\n  \"userType\": \"Teacher\"\n}"
+        }
+      }
+    },
+    {
+      "name": "2️⃣ Login User (sets JWT)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let jsonData = pm.response.json();",
+              "if (jsonData.token) {",
+              "   pm.environment.set('token', jsonData.token);",
+              "   console.log('✅ Token saved to environment');",
+              "} else {",
+              "   console.log('❌ No token found in response');",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": "{{base_url}}/api/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"asmith\",\n  \"password\": \"1234\",\n  \"userType\": \"Teacher\"\n}"
+        }
+      }
+    },
+    {
+      "name": "3️⃣ Create Test (Teacher)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": "{{base_url}}/api/teachers/0/tests",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Intro to Python Quiz\"\n}"
+        }
+      }
+    },
+    {
+      "name": "4️⃣ Add Question to Test",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": "{{base_url}}/api/teachers/0/tests/0/questions",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"question\": \"What is 2 + 2?\",\n  \"options\": [\"1\", \"2\", \"3\", \"4\"],\n  \"answer\": 3\n}"
+        }
+      }
+    },
+    {
+      "name": "5️⃣ Student Joins Test",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": "{{base_url}}/api/tests/join",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"studentID\": 0,\n  \"pin\": 1234\n}"
+        }
+      }
+    },
+    {
+      "name": "6️⃣ Submit Student Answer",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": "{{base_url}}/api/tests/0/answer",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"studentID\": 0,\n  \"questionID\": \"<replace_with_question_id>\",\n  \"selectedOption\": \"4\"\n}"
+        }
+      }
+    },
+    {
+      "name": "7️⃣ Get Student Scores",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "url": "{{base_url}}/api/students/0/scores"
+      }
+    },
+    {
+      "name": "8️⃣ Search Cards",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": "{{base_url}}/api/searchcards",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": 0,\n  \"search\": \"math\"\n}"
+        }
+      }
+    },
+    {
+      "name": "9️⃣ Next Question (Teacher advance)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": "{{base_url}}/api/nextquestion",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"teacherID\": 0,\n  \"testID\": 0\n}"
+        }
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:4000"
+    },
+    {
+      "key": "token",
+      "value": ""
+    }
+  ]
+}
