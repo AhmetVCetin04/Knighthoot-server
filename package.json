@@ -3,12 +3,12 @@
 	"version": "1.0.0",
 	"description": "",
 	"main": "server.js",
-
+	"type":"commonjs",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"backend": "nodemon server.js",
 		"frontend": "cd frontend && npm run dev -- --host",
-		"dev": "concurrently \"npm run backend\" \"npm run frontend\" "
+		"dev": "concurrently \"npm run backend\" \"npm run frontend\" ",
 		"stop": "pkill -f 'npm run dev' || pkill -f 'vite' || pkill -f 'nodemon' || true"
 	},
 	"author": "",
