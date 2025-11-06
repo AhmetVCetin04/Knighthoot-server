@@ -1,13 +1,16 @@
 // File: lib/screens/reset_password_screen.dart
 import 'package:flutter/material.dart';
+import '../services/api_service.dart';
 import 'login_screen.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
   final String email;
+  final String otp;  // ADDED THIS
 
   const ResetPasswordScreen({
     Key? key,
     required this.email,
+    required this.otp,  // ADDED THIS
   }) : super(key: key);
 
   @override
@@ -35,14 +38,12 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // TODO: Implement password reset API call
-      // await ApiService.updatePassword(
-      //   email: widget.email,
-      //   newPassword: _newPasswordController.text,
-      // );
-      
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 2));
+      // FIXED: Actually call API with all required parameters
+      await ApiService.updatePassword(
+        email: widget.email,
+        otp: widget.otp,  // SEND THE OTP!
+        newPassword: _newPasswordController.text,
+      );
 
       if (!mounted) return;
 

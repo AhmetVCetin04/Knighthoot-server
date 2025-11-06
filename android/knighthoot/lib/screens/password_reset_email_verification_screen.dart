@@ -1,7 +1,6 @@
 // File: lib/screens/password_reset_email_verification_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../services/api_service.dart';
 import 'reset_password_screen.dart';
 
 class PasswordResetEmailVerificationScreen extends StatefulWidget {
@@ -29,13 +28,11 @@ class _PasswordResetEmailVerificationScreenState
   );
 
   bool _isVerifying = false;
-  bool _isResending = false;
-  String? _sentOtp;
 
   @override
   void initState() {
     super.initState();
-    _sendOtp();
+    // DON'T send email here - it was already sent by forgot_password_screen!
   }
 
   @override
@@ -47,44 +44,6 @@ class _PasswordResetEmailVerificationScreenState
       node.dispose();
     }
     super.dispose();
-  }
-
-  Future<void> _sendOtp() async {
-    try {
-      final response = await ApiService.sendOtpEmail(widget.email);
-      _sentOtp = response['otp'];
-
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Verification code sent to ${widget.email}'),
-          backgroundColor: Colors.green,
-        ),
-      );
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toString().replaceAll('Exception: ', '')),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
-
-  Future<void> _resendCode() async {
-    setState(() => _isResending = true);
-
-    try {
-      await _sendOtp();
-      // Clear all fields
-      for (var controller in _controllers) {
-        controller.clear();
-      }
-      _focusNodes[0].requestFocus();
-    } finally {
-      if (mounted) setState(() => _isResending = false);
-    }
   }
 
   Future<void> _verifyEmail() async {
@@ -103,34 +62,20 @@ class _PasswordResetEmailVerificationScreenState
     setState(() => _isVerifying = true);
 
     try {
-      // In development mode, check against the OTP we received
-      // In production, this should be verified on the backend
-      if (enteredCode == _sentOtp) {
-        if (!mounted) return;
+      // Don't verify locally - just pass the OTP to reset screen
+      // The backend will verify it when the password is reset
+      if (!mounted) return;
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Email verified successfully!'),
-            backgroundColor: Colors.green,
+      // Navigate to reset password screen with the OTP
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ResetPasswordScreen(
+            email: widget.email,
+            otp: enteredCode,  // Backend will verify this OTP
           ),
-        );
-
-        // Navigate to reset password screen
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ResetPasswordScreen(email: widget.email),
-          ),
-        );
-      } else {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Invalid verification code'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+        ),
+      );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -309,7 +254,7 @@ class _PasswordResetEmailVerificationScreenState
                             ),
                           )
                         : const Text(
-                            'Verify Email',
+                            'Continue',
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -319,72 +264,15 @@ class _PasswordResetEmailVerificationScreenState
                 ),
                 const SizedBox(height: 24),
 
-                // Resend Code
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      "Didn't receive the code?",
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.white70,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    TextButton(
-                      onPressed: _isResending ? null : _resendCode,
-                      style: TextButton.styleFrom(
-                        padding: EdgeInsets.zero,
-                        minimumSize: Size.zero,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.refresh,
-                            size: 16,
-                            color: _isResending
-                                ? Colors.grey
-                                : const Color(0xFFFFC904),
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            'Resend code',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: _isResending
-                                  ? Colors.grey
-                                  : const Color(0xFFFFC904),
-                              decoration: TextDecoration.underline,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 32),
-
-                // Development Mode Notice (remove in production)
-                if (_sentOtp != null)
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF2A2A2A),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: const Color(0xFF444444),
-                      ),
-                    ),
-                    child: Text(
-                      'Development Mode: Your code is $_sentOtp',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.white54,
-                      ),
-                    ),
+                // Help text
+                const Text(
+                  'Check your email for the verification code',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.white70,
                   ),
+                  textAlign: TextAlign.center,
+                ),
               ],
             ),
           ),

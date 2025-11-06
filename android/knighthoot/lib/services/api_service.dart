@@ -4,9 +4,7 @@ import 'package:http/http.dart' as http;
 import '../models/user.dart';
 
 class ApiService {
-  // Change this to your backend URL
   static const String baseUrl = 'http://174.138.73.101:5173/api';
-  // For physical device: 'http://YOUR_IP_ADDRESS:5173/api'
 
   static Future<User> login(String username, String password) async {
     try {
@@ -64,27 +62,6 @@ class ApiService {
     }
   }
 
-  static Future<Map<String, dynamic>> startTest(String testCode) async {
-    try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/test/start'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'testCode': testCode,
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      } else {
-        final error = jsonDecode(response.body);
-        throw Exception(error['error'] ?? 'Failed to join quiz');
-      }
-    } catch (e) {
-      throw Exception('Connection error: $e');
-    }
-  }
-
   static Future<bool> checkEmailExists(String email) async {
     try {
       final response = await http.post(
@@ -96,9 +73,9 @@ class ApiService {
       );
 
       if (response.statusCode == 200) {
-        return true; // Email exists
+        return true;
       } else if (response.statusCode == 400) {
-        return false; // Email doesn't exist
+        return false;
       } else {
         throw Exception('Failed to check email');
       }
@@ -128,16 +105,41 @@ class ApiService {
     }
   }
 
+  // FIXED: Proper error handling
+  static Future<void> sendForgotPasswordEmail(String email) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/forgot-password'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'email': email,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        // Success - OTP saved to database and email sent
+        return;
+      } else {
+        final error = jsonDecode(response.body);
+        throw Exception(error['error'] ?? 'Failed to send reset email');
+      }
+    } catch (e) {
+      throw Exception('Connection error: $e');
+    }
+  }
+
   static Future<Map<String, dynamic>> updatePassword({
     required String email,
+    required String otp,
     required String newPassword,
   }) async {
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl/resetPassword'),
+        Uri.parse('$baseUrl/reset-password'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'email': email,
+          'otp': otp,
           'newPassword': newPassword,
         }),
       );
@@ -147,6 +149,27 @@ class ApiService {
       } else {
         final error = jsonDecode(response.body);
         throw Exception(error['error'] ?? 'Failed to reset password');
+      }
+    } catch (e) {
+      throw Exception('Connection error: $e');
+    }
+  }
+
+  static Future<Map<String, dynamic>> startTest(String testCode) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/test/start'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'testCode': testCode,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        final error = jsonDecode(response.body);
+        throw Exception(error['error'] ?? 'Failed to join quiz');
       }
     } catch (e) {
       throw Exception('Connection error: $e');
