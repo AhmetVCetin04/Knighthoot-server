@@ -2,6 +2,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/user.dart';
+import '../models/test_score.dart';
 
 class ApiService {
   static const String baseUrl = 'http://174.138.73.101:5173/api';
@@ -170,6 +171,29 @@ class ApiService {
       } else {
         final error = jsonDecode(response.body);
         throw Exception(error['error'] ?? 'Failed to join quiz');
+      }
+    } catch (e) {
+      throw Exception('Connection error: $e');
+    }
+  }
+
+    static Future<List<TestScore>> getStudentScores(
+      String studentId, String token) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/score/student/$studentId'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        return data.map((json) => TestScore.fromJson(json)).toList();
+      } else {
+        final error = jsonDecode(response.body);
+        throw Exception(error['error'] ?? 'Failed to fetch scores');
       }
     } catch (e) {
       throw Exception('Connection error: $e');

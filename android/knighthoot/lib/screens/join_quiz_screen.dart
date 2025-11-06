@@ -5,7 +5,8 @@ import '../services/quiz_services.dart';
 import '../services/quiz_session.dart';
 import 'waiting_room_screen.dart';
 import 'quiz_question_screen.dart';
-import 'welcome_screen.dart'; // ADD THIS IMPORT
+import 'welcome_screen.dart';
+import 'grades_screen.dart';
 
 class JoinQuizScreen extends StatefulWidget {
   final User user;
@@ -146,18 +147,20 @@ class _JoinQuizScreenState extends State<JoinQuizScreen> {
   }
 
   void _onTabTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-    // TODO: Navigate to different screens based on tab
+    if (index == _selectedIndex) return; // Already on this tab
+    
     if (index == 1) {
-      // Grades tab - implement later
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Grades feature coming soon!'),
-          backgroundColor: Colors.orange,
+      // Navigate to Grades screen
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => GradesScreen(user: widget.user),
         ),
       );
+    } else {
+      setState(() {
+        _selectedIndex = index;
+      });
     }
   }
 
