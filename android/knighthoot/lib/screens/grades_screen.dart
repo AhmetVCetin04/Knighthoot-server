@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/user.dart';
 import '../models/test_score.dart';
 import '../services/api_service.dart';
+import 'join_quiz_screen.dart';
 
 enum SortBy { name, score, date }
 
@@ -21,12 +22,20 @@ class _GradesScreenState extends State<GradesScreen> {
   bool _isLoading = true;
   String _searchQuery = '';
   SortBy _currentSort = SortBy.date;
-  bool _isAscending = false; // false = descending (newest/highest first)
+  bool _isAscending = false;
+  bool _isSearching = false;
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _loadScores();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadScores() async {
@@ -72,17 +81,68 @@ class _GradesScreenState extends State<GradesScreen> {
     });
   }
 
-  void _changeSortBy(SortBy sortBy) {
+  void _toggleSearch() {
     setState(() {
-      if (_currentSort == sortBy) {
-        // Toggle ascending/descending
-        _isAscending = !_isAscending;
-      } else {
-        _currentSort = sortBy;
-        _isAscending = false; // Default to descending for new sort
+      _isSearching = !_isSearching;
+      if (!_isSearching) {
+        _searchController.clear();
+        _onSearchChanged('');
       }
-      _applySorting();
     });
+  }
+
+  void _showSortDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF272727),
+          title: const Text(
+            'Sort by',
+            style: TextStyle(color: Colors.white),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildSortOption('Name', SortBy.name),
+              _buildSortOption('Score', SortBy.score),
+              _buildSortOption('Date', SortBy.date),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildSortOption(String label, SortBy sortBy) {
+    final isActive = _currentSort == sortBy;
+    return ListTile(
+      title: Text(
+        label,
+        style: TextStyle(
+          color: isActive ? const Color(0xFFFFC904) : Colors.white,
+          fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+        ),
+      ),
+      trailing: isActive
+          ? Icon(
+              _isAscending ? Icons.arrow_upward : Icons.arrow_downward,
+              color: const Color(0xFFFFC904),
+            )
+          : null,
+      onTap: () {
+        setState(() {
+          if (_currentSort == sortBy) {
+            _isAscending = !_isAscending;
+          } else {
+            _currentSort = sortBy;
+            _isAscending = false;
+          }
+          _applySorting();
+        });
+        Navigator.pop(context);
+      },
+    );
   }
 
   void _applySorting() {
@@ -118,156 +178,174 @@ class _GradesScreenState extends State<GradesScreen> {
         elevation: 0,
         centerTitle: true,
         automaticallyImplyLeading: false,
-        title: const Text(
-          'Knighthoot',
-          style: TextStyle(
-            color: Color(0xFFFFC904),
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1,
-          ),
+        leading: IconButton(
+          icon: const Icon(Icons.sort, color: Color(0xFFFFC904)),
+          onPressed: _showSortDialog,
         ),
+        title: _isSearching
+            ? TextField(
+                controller: _searchController,
+                autofocus: true,
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  hintText: 'Search tests...',
+                  hintStyle: TextStyle(color: Colors.white54),
+                  border: InputBorder.none,
+                ),
+                onChanged: _onSearchChanged,
+              )
+            : const Text(
+                'Knighthoot',
+                style: TextStyle(
+                  color: Color(0xFFFFC904),
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1,
+                ),
+              ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.search, color: Color(0xFFFFC904)),
+            icon: Icon(
+              _isSearching ? Icons.close : Icons.search,
+              color: const Color(0xFFFFC904),
+            ),
             onPressed: () {
-              // Search icon - could toggle search bar visibility
+              if (mounted) {
+                setState(() {
+                  _isSearching = !_isSearching;
+                  if (!_isSearching) {
+                    _searchController.clear();
+                    _onSearchChanged('');
+                  }
+                });
+              }
             },
           ),
         ],
       ),
-      body: Column(
+      body: Stack(
         children: [
-          // Search Bar
-          Container(
-            padding: const EdgeInsets.all(16),
-            color: const Color(0xFF171717),
-            child: TextField(
-              onChanged: _onSearchChanged,
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                hintText: 'Search tests...',
-                hintStyle: const TextStyle(color: Colors.white38),
-                prefixIcon: const Icon(Icons.search, color: Colors.white54),
-                filled: true,
-                fillColor: const Color(0xFF2A2A2A),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide.none,
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-              ),
-            ),
+          // Background decorative squares
+          Positioned(
+            top: 50,
+            right: 30,
+            child: _buildHollowSquare(200, 2),
+          ),
+          Positioned(
+            top: 0,
+            left: 0,
+            child: _buildHollowSquare(200, 2),
+          ),
+          Positioned(
+            bottom: 200,
+            right: 50,
+            child: _buildHollowSquare(80, 2),
+          ),
+          Positioned(
+            bottom: 100,
+            left: 20,
+            child: _buildHollowSquare(50, 2),
+          ),
+          Positioned(
+            top: 300,
+            right: 70,
+            child: _buildHollowSquare(35, 2),
+          ),
+          Positioned(
+            top: 400,
+            left: 60,
+            child: _buildHollowSquare(45, 2),
+          ),
+          Positioned(
+            bottom: 200,
+            left: 80,
+            child: _buildHollowSquare(150, 2),
           ),
 
-          // Sort Options
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            color: const Color(0xFF171717),
-            child: Row(
-              children: [
-                const Text(
-                  'Sort by:',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 14,
+          // Main content
+          _isLoading
+              ? const Center(
+                  child: CircularProgressIndicator(
+                    color: Color(0xFFFFC904),
                   ),
-                ),
-                const SizedBox(width: 12),
-                _buildSortButton('Name', SortBy.name),
-                const SizedBox(width: 8),
-                _buildSortButton('Score', SortBy.score),
-                const SizedBox(width: 8),
-                _buildSortButton('Date', SortBy.date),
-              ],
-            ),
-          ),
-
-          const Divider(height: 1, color: Color(0xFF333333)),
-
-          // Scores List
-          Expanded(
-            child: _isLoading
-                ? const Center(
-                    child: CircularProgressIndicator(
-                      color: Color(0xFFFFC904),
-                    ),
-                  )
-                : _filteredScores.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              _searchQuery.isEmpty
-                                  ? Icons.assignment_outlined
-                                  : Icons.search_off,
-                              size: 64,
-                              color: Colors.white24,
+                )
+              : _filteredScores.isEmpty
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            _searchQuery.isEmpty
+                                ? Icons.assignment_outlined
+                                : Icons.search_off,
+                            size: 64,
+                            color: Colors.white24,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            _searchQuery.isEmpty
+                                ? 'No tests taken yet'
+                                : 'No tests found',
+                            style: const TextStyle(
+                              color: Colors.white54,
+                              fontSize: 16,
                             ),
-                            const SizedBox(height: 16),
-                            Text(
-                              _searchQuery.isEmpty
-                                  ? 'No tests taken yet'
-                                  : 'No tests found',
-                              style: const TextStyle(
-                                color: Colors.white54,
-                                fontSize: 16,
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    : RefreshIndicator(
-                        color: const Color(0xFFFFC904),
-                        onRefresh: _loadScores,
-                        child: ListView.builder(
-                          padding: const EdgeInsets.all(16),
-                          itemCount: _filteredScores.length,
-                          itemBuilder: (context, index) {
-                            final score = _filteredScores[index];
-                            return _buildScoreCard(score);
-                          },
-                        ),
+                          ),
+                        ],
                       ),
-          ),
+                    )
+                  : RefreshIndicator(
+                      color: const Color(0xFFFFC904),
+                      onRefresh: _loadScores,
+                      child: ListView.builder(
+                        padding: const EdgeInsets.all(16),
+                        itemCount: _filteredScores.length,
+                        itemBuilder: (context, index) {
+                          final score = _filteredScores[index];
+                          return _buildScoreCard(score);
+                        },
+                      ),
+                    ),
         ],
       ),
-    );
-  }
-
-  Widget _buildSortButton(String label, SortBy sortBy) {
-    final isActive = _currentSort == sortBy;
-    return InkWell(
-      onTap: () => _changeSortBy(sortBy),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: isActive ? const Color(0xFFFFC904) : const Color(0xFF2A2A2A),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              label,
-              style: TextStyle(
-                color: isActive ? Colors.black : Colors.white70,
-                fontSize: 12,
-                fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-              ),
+          color: const Color(0xFF272727),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.3),
+              blurRadius: 8,
+              offset: const Offset(0, -2),
             ),
-            if (isActive) ...[
-              const SizedBox(width: 4),
-              Icon(
-                _isAscending ? Icons.arrow_upward : Icons.arrow_downward,
-                size: 12,
-                color: Colors.black,
-              ),
-            ],
+          ],
+        ),
+        child: BottomNavigationBar(
+          backgroundColor: const Color(0xFF272727),
+          selectedItemColor: const Color(0xFFFFC904),
+          unselectedItemColor: Colors.white54,
+          currentIndex: 1, // Grades tab
+          onTap: (index) {
+            if (index == 0) {
+              // Navigate back to Test tab
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => JoinQuizScreen(user: widget.user),
+                ),
+              );
+            }
+          },
+          type: BottomNavigationBarType.fixed,
+          elevation: 0,
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.assignment),
+              label: 'Test',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.grade),
+              label: 'Grades',
+            ),
           ],
         ),
       ),
@@ -376,5 +454,18 @@ class _GradesScreenState extends State<GradesScreen> {
       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
     ];
     return '${date.day}/${date.month}/${date.year}';
+  }
+
+  Widget _buildHollowSquare(double size, double borderWidth) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: const Color(0xFF272727),
+          width: borderWidth,
+        ),
+      ),
+    );
   }
 }
