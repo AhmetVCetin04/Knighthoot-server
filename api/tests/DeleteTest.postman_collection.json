@@ -1,0 +1,113 @@
+{
+  "info": {
+    "name": "Delete Test API Test",
+    "_postman_id": "ac8b1a2f-01d4-4e6a-9d9f-14044e87f91c",
+    "description": "Tests deleting a test by custom ID with TID verification",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Delete Test - Valid Owner",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/test/{{createdTestID}}?TID={{createdTestTID}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "test", "{{createdTestID}}"],
+          "query": [
+            {
+              "key": "TID",
+              "value": "{{createdTestTID}}"
+            }
+          ]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+              "const res = pm.response.json();",
+              "pm.test(\"Message returned\", () => pm.expect(res).to.have.property('message'));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Delete Test - Wrong TID (Permission Denied)",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/test/{{createdTestID}}?TID=9999",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "test", "{{createdTestID}}"],
+          "query": [
+            {
+              "key": "TID",
+              "value": "9999"
+            }
+          ]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 404 or 400\", () => pm.expect([404,400]).to.include(pm.response.code));",
+              "pm.test(\"Error returned\", () => pm.expect(pm.response.json()).to.have.property('error'));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Delete Test - Already Deleted",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/test/{{createdTestID}}?TID={{createdTestTID}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "test", "{{createdTestID}}"],
+          "query": [
+            {
+              "key": "TID",
+              "value": "{{createdTestTID}}"
+            }
+          ]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 404\", () => pm.response.to.have.status(404));",
+              "pm.test(\"Error returned\", () => pm.expect(pm.response.json()).to.have.property('error'));",
+              "",
+              "// ✅ Cleanup env now that test is gone",
+              "pm.environment.unset(\"createdTestID\");",
+              "pm.environment.unset(\"createdTestTID\");"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5173"
+    }
+  ]
+}

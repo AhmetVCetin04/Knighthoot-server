@@ -1,0 +1,75 @@
+{
+  "info": {
+    "name": "Login API Test",
+    "_postman_id": "c3fbb1c3-865d-4c40-93a0-e0ad8e11c123",
+    "description": "Tests login API for Teachers & Students",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Login - Valid User",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"username\": \"testlab\", \"password\": \"labtest\"}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "login"]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let res = pm.response.json();",
+              "",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Has required user fields\", function () {",
+              "    pm.expect(res).to.have.property(\"_id\");",
+              "    pm.expect(res).to.have.property(\"firstName\");",
+              "    pm.expect(res).to.have.property(\"lastName\");",
+              "    pm.expect(res).to.have.property(\"username\");",
+              "    pm.expect(res).to.have.property(\"email\");",
+              "    pm.expect(res).to.have.property(\"role\");",
+              "});",
+              "",
+              "pm.test(\"Role is teacher or student\", function () {",
+              "    pm.expect([\"teacher\", \"student\"]).to.include(res.role);",
+              "});",
+              "",
+              "// ✅ backend always returns error key, must be empty or undefined",
+              "pm.test(\"Error field empty or missing\", function () {",
+              "    pm.expect(!res.error || res.error === \"\").to.be.true;",
+              "});",
+              "",
+              "pm.environment.set(\"userId\", res._id);",
+              "pm.environment.set(\"username\", res.username);",
+              "pm.environment.set(\"role\", res.role);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5173"
+    }
+  ]
+}

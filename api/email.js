@@ -1,56 +1,52 @@
 //import { Auth } from "two-step-auth";
-const Auth = require("two-step-auth");
-const nodeMailer = require("nodemailer");
+const sgMail = require("@sendgrid/mail");
 require('dotenv').config();
 
-async function handleEmail(req, res, db) {
+
+async function handleEmail(req, res) {
     const { email: targetEmail } = req.body;
-	const apiEmail = process.env.EMAIL_USER;
-	const apiPass = process.env.EMAIL_PASSWORD;
-	
+
     if (!targetEmail) {
         return res.status(400).json({ error: "Email is required in the request body." });
     }
+
+	const apiEmail = process.env.EMAIL_USER;
+	const apiKey = process.env.EMAIL_API_KEY;
 	
 
-	
 
-    trynsporter = nodemailer.createTransport({
-	      host: “smtp.zoho.com”,
-	      secure: true,
-	      port: 465,
-	      auth: {
-		          user: apiEmail,
-		          pass: apiPass,
-		        },
-    });
-	
+	const otp = Math.floor(100000 + Math.random() * 900000).toString();
+	const page= `
+		<div style="text-align:center;">
+			<p>Your one time password:</p>
+			<h1 style="font-weight:bold; color:#FFC904; background-color:black; font-size: 80px;">${otp}</h1>
+		</div>
+	`;
 
-	{
-	const otp = Math.floor(100000 + Math.random() * 900000);
-	const mailOptions = {
-		 from: apiEmail, // sender address
-		 to: targetEmail,
-		 subject: “Knighthoot OTP Reset: ” + otp.toString(), // Subject line
-		 html: <p>One time password: {otp}</p>, // plain text body
-	};
 
-        // Teammate will add specific logic here
+	sgMail.setApiKey(apiKey);
+	const msg= ({
+		to:targetEmail,
+		from:apiEmail,
+		subject:"Knighthoot OTP vode: " + otp,
+		text:"KNIGHTHOOT",
+		html:page
+	});
 
-        if (authResult.success) {
-            res.status(200).json({
-                message: "OTP email sent successfully (placeholder response).",
-                mail: authResult.mail,
-                success: authResult.success
-            });
-        } else {
-            res.status(500).json({ error: "Failed to send OTP email.", details: authResult });
-        }
+	sgMail
+	.send(msg)
+	.then((response) => {
+		if (process.env.NODE_ENV !== "test") {
+			console.log("Email sent:", response[0].statusCode);
+		}
+	})
+	.catch((error) => {
+		if (process.env.NODE_ENV !== "test") {
+			console.error("Email error:", error.message);
+		}
+	});
 
-    } catch (error) {
-        console.error("Error sending email:", error);
-        res.status(500).json({ error: "An internal server error occurred while sending the email." });
-    }
+        res.status(200).json({otp:otp});
 }
 
 module.exports = handleEmail;

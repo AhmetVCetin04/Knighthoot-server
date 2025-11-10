@@ -1,0 +1,90 @@
+{
+  "info": {
+    "name": "Register Student API Test",
+    "_postman_id": "15b1b7de-89ad-4e25-9c8c-bf891e13fabc",
+    "description": "Tests student registration API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Register - Student",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"firstName\": \"Jon\", \"lastName\": \"Snow\", \"username\": \"jonsnow456\", \"password\": \"password\", \"email\": \"jonsnow@example.com\", \"isTeacher\": false}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/register",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "register"
+          ]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let res = pm.response.json();",
+              "let status = pm.response.code;",
+              "",
+              "// ✅ If user already exists",
+              "if (status === 400) {",
+              "    pm.test(\"Status is 400 for existing user\", function () {",
+              "        pm.expect(status).to.eql(400);",
+              "    });",
+              "    pm.test(\"Has error message\", function () {",
+              "        pm.expect(res).to.have.property(\"error\");",
+              "    });",
+              "} else {",
+              "    // ✅ New user flow",
+              "    pm.test(\"Status code is 201\", function () {",
+              "        pm.expect(status).to.eql(201);",
+              "    });",
+              "    pm.test(\"User object exists\", function () {",
+              "        pm.expect(res).to.have.property(\"user\");",
+              "    });",
+              "    pm.test(\"Has required user fields\", function () {",
+              "        pm.expect(res.user).to.have.property(\"_id\");",
+              "        pm.expect(res.user).to.have.property(\"ID\");",
+              "        pm.expect(res.user).to.have.property(\"firstName\");",
+              "        pm.expect(res.user).to.have.property(\"lastName\");",
+              "        pm.expect(res.user).to.have.property(\"username\");",
+              "        pm.expect(res.user).to.have.property(\"email\");",
+              "    });",
+              "    pm.test(\"Contains success message\", function () {",
+              "        pm.expect(res.message).to.include(\"created\");",
+              "    });",
+              "",
+              "    // ✅ Save values to environment vars",
+              "    pm.environment.set(\"sUserId\", res.user._id);",
+              "    pm.environment.set(\"sUsername\", res.user.username);",
+              "    pm.environment.set(\"sEmail\", res.user.email);",
+              "    pm.environment.set(\"sNumID\", res.user.ID);",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5173"
+    }
+  ]
+}

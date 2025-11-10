@@ -1,0 +1,158 @@
+/* Make the page itself fill the viewport */
+html, body, #root { height: 100%; }
+body { margin: 0; }
+
+/* site background already on <main class="site-bg"> */
+.site-bg {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== Top Bar ===== */
+.accounttype__topbar{
+  position: fixed;          /* was sticky; fixed ensures full-bleed */
+  top: 0; left: 0; right: 0;
+  height: 77px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  background: #232323;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  padding: 0 20px;
+  z-index: 10;
+}
+
+.accounttype__back {
+  justify-self: start;
+  background: transparent;
+  border: none;
+  color: #e7e7e7;
+  font-size: 15px;
+  cursor: pointer;
+  padding: 6px 4px;
+}
+
+.accounttype__title {
+  justify-self: center;
+  font-family: "Oswald", "Montserrat", sans-serif;
+  font-weight: 700;
+  font-size: 28px;
+  color: #d5ac16;
+}
+
+.accounttype__logo {
+  justify-self: end;
+  width: 70px;
+  height: 40px;
+}
+
+/* ===== Stage: fills remaining height under the header ===== */
+.accounttype__stage{
+  /* header is 60px tall; fill the rest of the viewport */
+  min-height: calc(100vh - 60px);
+  padding-top: 60px;     /* avoid being hidden under the fixed header */
+  display: grid;
+  place-items: center;   /* perfectly center the card */
+}
+
+/* ===== Card ===== */
+.accounttype__card{
+  width: min(600px, 92vw);
+  background: #232323;
+  border: 1px solid rgba(255,255,255,.05);
+  border-radius: 8px;
+  box-shadow: 0 20px 25px rgba(0,0,0,.45);
+  padding: 20px 22px 14px;
+  text-align: left;
+  margin: 0;             /* important: let the stage handle centering */
+}
+
+.accounttype__cardtitle {
+  color: #d9d9d9;
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+/* ===== Options ===== */
+.accounttype__options {
+  display: grid;
+  grid-template-columns: repeat(2, auto); /* auto fits content width */
+  gap: 14px;
+  justify-content: left;                /* centers both boxes */
+  margin-bottom: 14px;
+}
+
+.accounttype__btn {
+  display: flex;
+  width: 215px; 
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  padding: 30px 38px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 26px;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.25);
+  color: #0b0b0b;
+}
+
+.accounttype__icon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  display: block;
+}
+
+.accounttype__btn span {
+  display: flex;
+  align-items: center;
+  height: 32px;
+  line-height: 32px;
+  padding-left: 12px;
+  border-left: 1.5px solid rgba(0, 0, 0, 0); /* subtle line */
+}
+
+.accounttype__btn.gold {
+  background: linear-gradient(90deg, #c4961a, #e4b700);
+}
+
+.accounttype__btn.silver {
+  background: #d6d6d6;
+  color: #121212;
+}
+
+.accounttype__icon {
+  width: 46px;
+  height: 46px;
+  object-fit: contain;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+/* ===== Footer ===== */
+.accounttype__footer {
+  color: #c6c7c9;
+  font-size: 16px;
+}
+
+.accounttype__loginlink {
+  color: #e1bf2a;
+  text-decoration: underline;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 640px) {
+  .accounttype__options {
+    grid-template-columns: 1fr;
+  }
+
+  .accounttype__card {
+    margin: 70px auto;
+  }
+}

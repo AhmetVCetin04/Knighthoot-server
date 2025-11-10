@@ -1,0 +1,85 @@
+/* FILE PICKER BUTTONS */
+.cq__fileBtn {
+  margin-top: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: #2a2a31;
+  color: #e9e9ec;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background .15s ease;
+}
+.cq__fileBtn:hover { background: #34343b; }
+.cq__fileBtn img { width: 22px; height: 22px; object-fit: contain; filter: brightness(0) invert(1); }
+.cq__fileBtn span { font-size: 15px; }
+
+.cq__fileBtn span {
+  font-size: 15px;
+}
+
+/* smaller inline button for each option row */
+.cq__fileBtn--small {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  background: #3a3a40;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+.cq__fileBtn--small img {
+  width: 20px;
+  height: 20px;
+  filter: brightness(0) invert(1);
+}
+
+/* ========== “or” SEPARATOR ========== */
+.cq__orRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 8px 0;
+}
+.cq__orLine {
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+}
+.cq__orText {
+  color: #aaa;
+  font-size: 13px;
+  text-transform: uppercase;
+}
+
+/* ========== OPTION ROWS ========== */
+.cq__optionRow {
+  display: grid;
+  grid-template-columns: auto 1fr 1fr auto;
+  gap: 8px;
+  align-items: center;
+}
+.cq__optionRow input[type="radio"] {
+  accent-color: #d5ac16;
+}
+
+/* keep consistent card spacing */
+.cq__card {
+  margin-top: 16px;
+  padding: 16px;
+  background: #1f2022;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+}
+
+/* optional: nicer spacing for labels */
+.cq__label {
+  font-weight: 600;
+  margin-top: 12px;
+  margin-bottom: 6px;
+  display: block;
+}

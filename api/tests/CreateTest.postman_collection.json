@@ -1,0 +1,93 @@
+{
+  "info": {
+    "name": "Create Test API Test",
+    "_postman_id": "db3d5f08-652d-4ef8-bff4-62fb1ebe8001",
+    "description": "Tests the /api/test endpoint for creating exams/quizzes",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Create Test - Valid",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "// generate random Test ID to avoid collisions",
+              "pm.environment.set(\"randomTestID\", \"Test_\" + Date.now());"
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let res = pm.response.json();",
+              "let status = pm.response.code;",
+              "",
+              "// ✅ If test is new, expect 201",
+              "if (status === 201) {",
+              "    pm.test(\"Status 201 Created\", function () {",
+              "        pm.expect(status).to.eql(201);",
+              "    });",
+              "",
+              "    pm.test(\"Test object returned\", function () {",
+              "        pm.expect(res).to.have.property(\"test\");",
+              "    });",
+              "",
+              "    pm.test(\"Test fields are present\", function () {",
+              "        pm.expect(res.test).to.have.property(\"TID\");",
+              "        pm.expect(res.test).to.have.property(\"ID\");",
+              "        pm.expect(res.test).to.have.property(\"PIN\");",
+              "        pm.expect(res.test).to.have.property(\"questions\");",
+              "        pm.expect(res.test).to.have.property(\"isLive\");",
+              "        pm.expect(res.test).to.have.property(\"currentQuestion\");",
+              "    });",
+              "",
+              "    pm.environment.set(\"createdTestID\", res.test.ID);",
+              "",
+              "} else {",
+              "",
+              "// ✅ If already exists, expect 400",
+              "    pm.test(\"Status 400 Duplicate ID\", function () {",
+              "        pm.expect(status).to.eql(400);",
+              "    });",
+              "",
+              "    pm.test(\"Error returned\", function () {",
+              "        pm.expect(res).to.have.property(\"error\");",
+              "    });",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"TID\": 1,\n  \"ID\": \"{{randomTestID}}\",\n  \"PIN\": \"5555\",\n  \"questions\": [\n    {\n      \"question\": \"What is 2+2?\",\n      \"answer\": 1,\n      \"options\": [\n        \"3\",\n        \"4\",\n        \"5\"\n      ]\n    }\n  ]\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/test",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "test"]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5173"
+    }
+  ]
+}

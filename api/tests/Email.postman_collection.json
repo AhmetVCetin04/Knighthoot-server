@@ -1,0 +1,116 @@
+{
+  "info": {
+    "name": "Send OTP Email API Test",
+    "_postman_id": "e23cc67c-1cd2-4fb8-b766-f52e49eaf200",
+    "description": "Tests the /email endpoint for OTP generation",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Send OTP - Valid Email",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\": \"user@example.com\"}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/email",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "email"]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let res = pm.response.json();",
+              "",
+              "// ✅ Status is 200",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "// ✅ OTP exists",
+              "pm.test(\"OTP returned\", function () {",
+              "    pm.expect(res).to.have.property(\"otp\");",
+              "});",
+              "",
+              "// ✅ OTP is 6 digits (string or number) ",
+              "pm.test(\"OTP is valid format\", function () {",
+              "    const otp = String(res.otp);",
+              "    pm.expect(otp).to.match(/^[0-9]{6}$/);",
+              "});",
+              "",
+              "// ✅ error must be empty or missing",
+              "pm.test(\"Error field empty or missing\", function () {",
+              "    pm.expect(!res.error || res.error === \"\").to.be.true;",
+              "});",
+              "",
+              "// ✅ Save OTP for future tests",
+              "pm.environment.set(\"testOTP\", res.otp);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Send OTP - Missing Email",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/email",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "email"]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let res = pm.response.json();",
+              "",
+              "// ✅ Should return 400",
+              "pm.test(\"Status code is 400\", function () {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "",
+              "// ✅ Must include error message",
+              "pm.test(\"Error field present\", function () {",
+              "    pm.expect(res).to.have.property(\"error\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5173"
+    }
+  ]
+}

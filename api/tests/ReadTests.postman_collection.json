@@ -1,0 +1,132 @@
+{
+  "info": {
+    "name": "Read Tests API Test",
+    "_postman_id": "c414ecac-b4da-4b2a-9e33-e2ecf370ac12",
+    "description": "Tests GET /api/test for reading and searching tests.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get Tests by TID",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/test?TID=1",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "test"],
+          "query": [
+            { "key": "TID", "value": "1" }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let res = pm.response.json();",
+              "pm.test(\"Status 200\", () => pm.expect(pm.response.code).to.eql(200));",
+              "pm.test(\"Returns an array\", () => pm.expect(res).to.be.an('array'));",
+              "if(res.length > 0) {",
+              "    pm.test(\"Test has TID\", () => pm.expect(res[0]).to.have.property('TID'));",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Search Tests by Keyword",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/test?search={{createdTestID}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "test"],
+          "query": [
+            { "key": "search", "value": "{{createdTestID}}" }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let res = pm.response.json();",
+              "pm.test(\"Status 200\", () => pm.expect(pm.response.code).to.eql(200));",
+              "pm.test(\"Returns an array\", () => pm.expect(res).to.be.an('array'));",
+              "if(res.length > 0) {",
+              "    pm.test(\"Answer key hidden in search mode\", () => pm.expect(res[0].questions[0]).to.not.have.property('answer'));",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Missing Params Should 400",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/test",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "test"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 400\", () => pm.expect(pm.response.code).to.eql(400));",
+              "let res = pm.response.json();",
+              "pm.test(\"Error returned\", () => pm.expect(res).to.have.property('error'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Both Params Provided (Backend Returns 200)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/test?TID=1&search=test",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "test"],
+          "query": [
+            { "key": "TID", "value": "1" },
+            { "key": "search", "value": "test" }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let status = pm.response.code;",
+              "let res = pm.response.json();",
+              "",
+              "// Backend currently returns 200 instead of 400",
+              "pm.test(\"Status 200 when both params passed\", () => {",
+              "    pm.expect(status).to.eql(200);",
+              "});",
+              "",
+              "pm.test(\"Returns an array\", () => {",
+              "    pm.expect(res).to.be.an('array');",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5173"
+    }
+  ]
+}

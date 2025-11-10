@@ -1,0 +1,47 @@
+{
+  "info": {
+    "name": "Login Student API Test",
+    "_postman_id": "4f5a2c0b-e6a5-4c4f-b4ff-91fc4539b120",
+    "description": "Tests student login API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Login - Student",
+      "request": {
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"username\":\"jonsnow456\",\"password\":\"password\"}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["api","login"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let res = pm.response.json();",
+              "pm.test(\"Login OK\", () => pm.expect(pm.response.code).to.eql(200));",
+              "pm.test(\"Has token\", () => pm.expect(res).to.have.property(\"token\"));",
+              "pm.test(\"Correct role\", () => pm.expect(res.role).to.eql(\"student\"));",
+              "",
+              "// ✅ Save unique student env vars",
+              "pm.environment.set(\"login_student_token\", res.token);",
+              "pm.environment.set(\"login_student_dbId\", res._id);",
+              "pm.environment.set(\"login_student_ID\", res.id);"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5173" }
+  ]
+}

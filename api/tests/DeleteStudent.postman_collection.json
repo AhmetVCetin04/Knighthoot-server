@@ -1,0 +1,71 @@
+{
+  "info": {
+    "name": "Delete Student API Test",
+    "_postman_id": "3c7b28f2-17e0-4e4c-bf99-4a38d8a1adf3",
+    "description": "Tests student self-delete endpoint",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Delete Student - valid token",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{login_student_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/account/delete",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "account", "delete"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Delete success (200)', function () {",
+              "    pm.expect(pm.response.code).to.eql(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Delete Student - second call should 404",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{login_student_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/account/delete",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "account", "delete"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Second delete returns 404', function () {",
+              "    pm.expect(pm.response.code).to.eql(404);",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5173" }
+  ]
+}

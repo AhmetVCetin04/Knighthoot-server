@@ -1,0 +1,107 @@
+{
+  "info": {
+    "name": "Email Exists API Test",
+    "_postman_id": "757c21c4-4e50-4d29-92d1-e29b38cbd5d1",
+    "description": "Tests /emailExists endpoint for checking registered emails",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Email Exists - Valid Email",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\": \"jane@example.com\"}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/emailExists",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "emailExists"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let res = pm.response.json();",
+              "let status = pm.response.code;",
+              "",
+              "// ✅ Expect 200",
+              "pm.test(\"Status is 200\", function () {",
+              "    pm.expect(status).to.eql(200);",
+              "});",
+              "",
+              "// ✅ 'exists' must be true",
+              "pm.test(\"Email exists flag true\", function () {",
+              "    pm.expect(res.exists).to.eql(true);",
+              "});",
+              "",
+              "// ✅ error must be empty or missing",
+              "pm.test(\"No error field or empty\", function () {",
+              "    pm.expect(!res.error || res.error === \"\").to.be.true;",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Email Exists - Missing Email Field",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/emailExists",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "emailExists"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let res = pm.response.json();",
+              "let status = pm.response.code;",
+              "",
+              "// ✅ Expect 400 for missing email",
+              "pm.test(\"Status is 400\", function () {",
+              "    pm.expect(status).to.eql(400);",
+              "});",
+              "",
+              "// ✅ error field should exist",
+              "pm.test(\"Error present\", function () {",
+              "    pm.expect(res).to.have.property(\"error\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5173"
+    }
+  ]
+}

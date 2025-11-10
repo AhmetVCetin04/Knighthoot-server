@@ -1,71 +1,156 @@
 import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom'; 
+import SiteBackground from "../components/SiteBackground";
+import ucf from "../assets/ucf.png";
+import "../Register.css"; 
 
 function Login()
 {
-	const [message,setMessage] = useState('');
-	const [loginName,setLoginName] = useState('');
-	const [loginPassword,setPassword] = useState('');
+  const [message,setMessage] = useState('');
+  const [loginName,setLoginName] = useState('');
+  const [loginPassword,setPassword] = useState('');
+  const [busy, setBusy] = useState(false);
+  const navigate = useNavigate();
 
+  function handleSetName(e: any): void {
+    setLoginName(e.target.value);
+  }
+  function handleSetPassword(e: any): void {
+    setPassword(e.target.value);
+  }
 
-	function handleSetName( e: any ) : void
-	{
-		setLoginName( e.target.value );
-	}
-	function handleSetPassword( e: any ) : void
-	{
-		setPassword( e.target.value );
-	}
+  async function doLogin(event:any): Promise<void> {
+    event.preventDefault();
+    setMessage('');
+    const body = JSON.stringify({ username: loginName, password: loginPassword });
 
-    function goToRegister():void{
-		window.location.href = '/register';
+    try {
+      setBusy(true);
+
+      // Use relative path; Vite proxy forwards to your backend
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body
+      });
+
+      // Try to read JSON (even on non-OK to show server error)
+      let data: any = null;
+      try { data = await response.json(); } catch { /* ignore */ }
+
+      if (!response.ok) {
+        const serverMsg = (data && (data.error || data.message)) || 'User/Password combination incorrect';
+        setMessage(serverMsg);
+        return;
+      }
+
+      // Save token (support various response shapes)
+      const token =
+        data?.token ??
+        data?.accessToken ??
+        data?.jwt ??
+        data?.data?.token ??
+        null;
+
+      if (token) {
+        localStorage.setItem('token', token);
+      }
+
+      // Keep original behavior: store whole payload for compatibility
+      localStorage.setItem('user_data', JSON.stringify(data));
+
+      // Try to find a usable teacher id for TID later
+      const user =
+        data?.user ??
+        data?.teacher ??
+        data?.profile ??
+        data?.data?.user ??
+        data;
+
+      const teacherId =
+        user?._id ??
+        user?.id ??
+        data?.teacherId ??
+        data?.TID ??
+        data?.id ??
+        null;
+
+      if (teacherId) {
+        localStorage.setItem('teacherId', String(teacherId));
+      }
+
+      // Decide role robustly
+      const isTeacher =
+        user?.role === 'teacher' ||
+        data?.role === 'teacher' ||
+        data?.isTeacher === true;
+
+      navigate(isTeacher ? '/dashboard/teacher' : '/dashboard/student', { replace: true });
     }
+    catch (err: any) {
+      setMessage(err?.message || 'Network error');
+    }
+    finally {
+      setBusy(false);
+    }
+  }
 
-	async function doLogin(event:any) : Promise<void>
-	{
-		event.preventDefault();
-		var obj = {username:loginName,password:loginPassword};
-		var js = JSON.stringify(obj);
-		try
-		{
-			const response = await fetch('http://174.138.73.101:5173/api/login',{method:'POST',body:js,headers:{'Content-Type':'application/json'}});
+  return (
+    <main className="site-bg">
+      <SiteBackground />
 
-			var res = JSON.parse(await response.text());
-			
-			if( res.id <= 0 )
-				{
-					setMessage('User/Password combination incorrect');
-				}
-				else
-					{
-						// var user =
-						// 	{firstName:res.firstName,lastName:res.lastName,id:res.id,email:res.email};
-						localStorage.setItem('user_data', JSON.stringify(res));
-						setMessage('');
-						window.location.href = '/cards';
-					}
-		}
-		catch(error:any)
-		{
-			alert(error.toString());
-			return;
-		}
-	};
+      {/* Top bar */}
+      <header className="reg-topbar">
+        <button className="reg-back" onClick={() => navigate(-1)} aria-label="Back">← Back</button>
+        <div className="reg-title">Knighthoot</div>
+        <img src={ucf} alt="UCF" className="reg-logo" />
+      </header>
 
+      {/* Stage & Card */}
+      <div className="reg-stage">
+        <section className="reg-card">
+          <h2 className="reg-card__heading">Log in</h2>
 
+          <form className="reg-form" onSubmit={doLogin}>
+            <input
+              type="text"
+              placeholder="Username or email"
+              className="reg-input"
+              value={loginName}
+              onChange={handleSetName}
+              autoFocus
+            />
 
-	return(
-		<div id="loginDiv">
-		<span id="inner-title">PLEASE LOG IN</span><br />
-		<input type="text" id="loginName" placeholder="Username" onChange={handleSetName} /><br />
-		<input type="password" id="loginPassword" placeholder="Password" onChange={handleSetPassword} /><br />
+            <div className="reg-password-wrap">
+              <input
+                type="password"
+                placeholder="Password"
+                className="reg-input"
+                value={loginPassword}
+                onChange={handleSetPassword}
+              />
+            </div>
 
+            <p className="reg-inline-help">
+              Forgot password?{" "}
+              <Link to="/password-reset" className="reg-link">Reset your password</Link>
+            </p>
 
-		<input type="submit" id="loginButton" className="buttons" value = "Login"
-		onClick={doLogin} />
-        <input type="submit" id="registerButton" className="buttons" value = "Register"
-		onClick={goToRegister} />
-		<span id="loginResult">{message}</span>
-		</div>
-	);
-};
+            <button type="submit" className="reg-submit" disabled={busy}>
+              {busy ? "Signing in..." : "Log in"}
+            </button>
+
+            <p className="reg-footer">
+              Don’t have an account?{" "}
+              <Link to="/account-type" className="reg-link">Sign up</Link>
+            </p>
+
+            {message && <p className="reg-error">{message}</p>}
+          </form>
+        </section>
+      </div>
+    </main>
+  );
+}
+
 export default Login;

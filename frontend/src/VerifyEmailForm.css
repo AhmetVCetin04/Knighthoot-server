@@ -1,0 +1,176 @@
+/* Make the page itself fill the viewport */
+html, body, #root { height: 100%; }
+body { margin: 0; }
+
+/* site background already on <main class="site-bg"> */
+.site-bg {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== Top Bar ===== */
+.accounttype__topbar{
+  position: fixed;          /* was sticky; fixed ensures full-bleed */
+  top: 0; left: 0; right: 0;
+  height: 77px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  background: #232323;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  padding: 0 20px;
+  z-index: 10;
+}
+
+.ve-back {
+  justify-self: start;
+  background: transparent;
+  border: none;
+  color: #e7e7e7;
+  font-size: 15px;
+  cursor: pointer;
+  padding: 6px 4px;
+}
+
+.ve-title {
+  justify-self: center;
+  font-family: "Oswald", "Montserrat", sans-serif;
+  font-weight: 700;
+  font-size: 28px;
+  color: #d5ac16;
+}
+
+.ve-logo {
+  justify-self: end;
+  width: 70px;
+  height: 40px;
+}
+
+.ve-stage{
+  min-height: calc(100vh - 60px);
+  padding-top: 60px;
+  display: grid;
+  place-items: center;
+  background: transparent; 
+  opacity: 1;
+}
+
+/* Stage centers the card */
+.ve-stage{
+  min-height:calc(100vh - 64px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:40px 16px;
+}
+
+/* Card */
+.ve-card{
+  width: min(560px, 92vw);
+  /*background: linear-gradient(#272727, #232323);
+  border:1px solid #2d2d2d;*/
+  background-color: #232323;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius:6px;
+  /*box-shadow: 0 20px 60px rgba(0,0,0,.55);
+  padding:36px 34px 22px;*/
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.45);
+  padding: 36px 40px;
+  text-align:center;
+}
+
+/* Icon */
+.ve-icon-wrap{ display:flex; justify-content:center; margin-top:6px; margin-bottom:18px; }
+.ve-icon-image{
+  width:72px; height:72px; border-radius:50%;
+  display:grid; place-items:center;
+  box-shadow: 0 8px 24px rgba(255,201,4,.25);
+}
+
+.ve-icon-mail{
+  width:28px; height:20px; position:relative; display:block;
+  background:transparent; border:2px solid #111; border-radius:3px;
+}
+.ve-icon-mail::after{
+  content:""; position:absolute; left:2px; right:2px; top:6px; height:2px;
+  background:#111; transform:skewY(-25deg);
+}
+
+/* Text */
+.ve-heading{ font-size:28px; font-weight:750; margin:4px 0 4px; }
+.ve-sub{ color:var(--muted); margin:0 0 4px; }
+.ve-email{ color:var(--gold); font-weight:600; margin:0 0 16px; }
+
+/* OTP boxes */
+.ve-otp{
+  display:flex;
+  gap:10px;
+  justify-content:center;
+  margin: 8px 0 18px;
+}
+.ve-otp-box{
+  width:56px; height:56px; text-align:center; font-size:24px; font-weight:700;
+  background:#3a3a3a; color:#f5f5f5; border:0; border-radius:8px;
+  outline:2px solid transparent; transition:outline-color .15s ease, background .15s ease;
+}
+.ve-otp-box:focus{ outline-color:var(--gold); background:#444; }
+@media (max-width:480px){
+  .ve-otp-box{ width:48px; height:48px; font-size:22px; }
+}
+
+/* Button */
+.ve-submit{
+  width: 100%;
+  height: 40px;
+  margin-top: 10px; 
+  border-radius: 8px;
+  background: linear-gradient(90deg,#c4961a,#e4b700);
+  color:#090909; font-weight:1000; border:none; cursor:pointer; text-decoration: bold;
+  box-shadow:0 10px 26px rgba(0,0,0,.25);
+}
+/*.ve-submit{
+  width:100%;
+  margin-top:6px;
+  height:46px;
+  border-radius:8px;
+  border:0;
+  background:var(--gold);
+  color:#d5ac16;
+  font-weight:800;
+  font-size:16px;
+  cursor:pointer;
+  box-shadow: 0 8px 24px rgba(255,201,4,.25);
+}*/
+.ve-submit:disabled{
+  opacity:.55; cursor:not-allowed; box-shadow:none;
+}
+
+/* Resend */
+.ve-resend{
+  margin-top:14px;
+  color:#bdbdbd;
+  font-size:14px;
+}
+.ve-resend-link{
+  margin-left:6px;
+  font-size:14px;
+  color:var(--gold);
+  background:none; border:none; cursor:pointer; text-decoration:underline;
+}
+
+/* Dev bar */
+.ve-devbar{
+  margin-top:18px;
+  background:#3a3a3a;
+  border-radius:8px;
+  padding:10px 14px;
+  color:#d9d9d9;
+  display:flex;
+  gap:8px;
+  justify-content:center;
+  align-items:center;
+  font-size:14px;
+}
+.ve-devcode{ margin-left:6px; color:#e1e1e1; }

@@ -1,0 +1,202 @@
+/* === MyQuizzes Page Styles === */
+
+/* Layout wrapper */
+.qz-wrap {
+  padding: 24px;
+  color: #e6e6e6;
+}
+
+/* Page title + Create button */
+.qz-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.qz-head h1 {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+/* Buttons */
+.btn {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-sm {
+  padding: 8px 12px;
+}
+
+.btn-gold {
+  background: #ffcc00;
+  color: #111;
+  transition: filter 0.2s ease;
+}
+
+.btn-gold:hover {
+  filter: brightness(0.95);
+}
+
+/* Icon buttons (grid/list, duplicate, delete, etc.) */
+.icon-btn {
+  border: none;
+  background: #2b2b2b;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.icon-btn:hover {
+  background: #3a3a3a;
+}
+
+.icon-btn.is-active {
+  outline: 2px solid #ffcc00;
+}
+
+/* Toolbar (search, sort, view) */
+.qz-toolbar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.qz-search input {
+  width: 420px;
+  max-width: 55vw;
+  background: #222;
+  border: 1px solid #333;
+  color: #ddd;
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.qz-sort label {
+  margin-right: 6px;
+  color: #9a9a9a;
+}
+
+.qz-sort select {
+  background: #222;
+  border: 1px solid #333;
+  color: #ddd;
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+.qz-view {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #9a9a9a;
+}
+
+/* Empty state */
+.qz-empty {
+  background: #1c1c1c;
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+  padding: 48px 24px;
+  text-align: center;
+}
+
+.qz-empty__icon {
+  width: 44px;
+  height: 44px;
+  margin: 0 auto 12px;
+  background: #2b2b2b;
+  border-radius: 10px;
+}
+
+/* Grid view */
+.qz-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.qz-card {
+  background: #1c1c1c;
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.qz-card__title {
+  font-weight: 700;
+}
+
+.qz-card__meta {
+  display: flex;
+  gap: 12px;
+  color: #9a9a9a;
+  font-size: 14px;
+}
+
+.qz-card__actions {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.qz-card__icons {
+  display: flex;
+  gap: 8px;
+}
+
+/* List view */
+.qz-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.qz-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #1c1c1c;
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+.qz-row__title {
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.qz-row__meta {
+  display: flex;
+  gap: 12px;
+  color: #9a9a9a;
+  font-size: 14px;
+}
+
+.qz-row__actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.qz-card:hover,
+.qz-row:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  transition: background-color 0.2s ease;
+}
+.qz-card,
+.qz-row {
+  cursor: pointer;
+}

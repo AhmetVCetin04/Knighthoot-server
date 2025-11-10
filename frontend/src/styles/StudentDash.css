@@ -1,0 +1,114 @@
+/* Fill the Viewport */
+html, body, #root { height: 100%; }
+body { margin: 0; }
+
+/* Site Background  */
+.site-bg {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== Header (copied & adjusted from Teacher) ===== */
+.studenttopbar{
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 77px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  background: #232323;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  padding: 0 20px;
+  z-index: 10;
+  color: #e7e7e7;
+}
+.studenttopbar__left{
+  display: flex; align-items: center; gap: 12px; font-weight: 700;
+}
+.studenttopbar__brand{
+  font-family: "Oswald","Montserrat",sans-serif;
+  font-size: 26px;
+  color: #d5ac16;               /* UCF gold */
+}
+.studenttopbar__divider{ color: #8a8a8a; }
+.studenttopbar__context{ color: #d0d0d0; font-weight: 600; }
+
+.studenttopbar__right{
+  display: flex; align-items: center; gap: 12px; justify-self: end;
+}
+.studenttopbar__logo{
+  width: 32px; height: 32px; border-radius: 50%; object-fit: contain;
+}
+.studenttopbar__logout{
+  padding: 8px 12px; background: #2a2a31; color: #e7e7e7;
+  border: 1px solid rgba(255,255,255,.10); border-radius: 10px;
+  font-weight: 600; cursor: pointer;
+}
+.studenttopbar__logout:hover{ background: #34343b; }
+
+/* ===== Stage ===== */
+.student__stage{
+  padding-top: 100px; /* space for fixed header */
+  text-align: center;
+}
+
+/* Welcome text */
+.student__welcome h1{
+  font-size: 32px; margin-bottom: 4px; color: #fff;
+}
+.student__welcome p{
+  margin-top: 0; color: #ccc;
+}
+
+/* ===== Grid (3 tiles) ===== */
+.student__grid{
+  max-width: 1000px;
+  margin: 40px auto;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap: 20px;
+  padding: 0 20px;
+}
+@media (max-width: 900px){
+  .student__grid{ grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px){
+  .student__grid{ grid-template-columns: 1fr; }
+}
+
+/* ===== Tiles ===== */
+.student__tile{
+  display: flex; align-items: center; gap: 18px;
+  border-radius: 12px; border: 1px solid rgba(255,255,255,.08);
+  padding: 22px; text-align: left; cursor: pointer;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.student__tile:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,.35);
+}
+.student__tile img{
+  width: 42px; height: 42px; object-fit: contain;
+}
+.student__tile h3{
+  margin: 0; font-size: 20px; font-weight: 700;
+}
+.student__tile p{
+  margin: 4px 0 0; font-size: 14px;
+}
+
+/* Color variants */
+.gold{
+  background: linear-gradient(#d2ac3d, #c39a1f);
+  color: #141414;
+}
+.silver{
+  background: linear-gradient(#dcdde2, #c6c7cd);
+  color: #141414;
+}
+.silver-dark{
+  background: linear-gradient(#a2a8b6, #8f95a1);
+  color: #141414;
+}
