@@ -56,7 +56,7 @@ function Register() {
       setSending(true);
       setMessage("");
 
-      const resp = await fetch("http://174.138.73.101:5173/api/email", {
+      const resp = await fetch("https://knighthoot.app/api/email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: registerEmail }),
@@ -108,7 +108,7 @@ function Register() {
     try {
       setRegistering(true);
       const response = await fetch(
-        "http://174.138.73.101:5173/api/register",
+        "https://knighthoot.app/api/register",
         { method: "POST", body: JSON.stringify(obj), headers: { "Content-Type": "application/json" } }
       );
       const res = JSON.parse(await response.text());

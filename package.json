@@ -3,18 +3,21 @@
 	"version": "1.0.0",
 	"description": "",
 	"main": "server.js",
-	"type":"commonjs",
+	"type": "commonjs",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"backend": "nodemon server.js",
-		"frontend": "cd frontend && npm run dev -- --host",
+		"frontend": "cd frontend && npm run dev -- --host --port 5174",
 		"dev": "concurrently \"npm run backend\" \"npm run frontend\" ",
-		"stop": "pkill -f 'npm run dev' || pkill -f 'vite' || pkill -f 'nodemon' || true"
+		"stop": "pkill -f 'npm run dev' || pkill -f 'vite' || pkill -f 'nodemon' || true",
+		"background": "npm run dev > /dev/null &"
 	},
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
+		"@sendgrid/mail": "^8.1.6",
 		"bcrypt": "^6.0.0",
+		"bcryptjs": "^3.0.3",
 		"concurrently": "^9.2.1",
 		"cors": "^2.8.5",
 		"dotenv": "^17.2.3",
@@ -22,7 +25,7 @@
 		"jsonwebtoken": "^9.0.2",
 		"mongodb": "^5.9.2",
 		"mongoose": "^8.19.2",
-		"nodemailer": "^7.0.9",
+		"nodemailer": "^7.0.10",
 		"otp-generator": "^4.0.1",
 		"two-step-auth": "^1.1.2"
 	}

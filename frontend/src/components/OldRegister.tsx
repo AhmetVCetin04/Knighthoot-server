@@ -87,7 +87,7 @@ function Register()
         var js = JSON.stringify(obj);
 		try
 		{
-			const response = await fetch('http://174.138.73.101:5173/api/register',{method:'POST',body:js,headers:{'Content-Type':'application/json'}});
+			const response = await fetch('https://knighthoot.app/api/register',{method:'POST',body:js,headers:{'Content-Type':'application/json'}});
 
 			var res = JSON.parse(await response.text());
 			

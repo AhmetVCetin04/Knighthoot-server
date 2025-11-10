@@ -29,7 +29,7 @@ function CardUI()
 		try
 		{
 			const response = await
-			fetch('http://174.138.73.101:5173/api/addcard',
+			fetch('https://knighthoot.app/api/addcard',
 			      {method:'POST',body:js,headers:{'Content-Type':
 				      'application/json'}});
 			      let txt = await response.text();
@@ -56,7 +56,7 @@ function CardUI()
 		try
 		{
 			const response = await
-			fetch('http://174.138.73.101:5173/api/searchcards',
+			fetch('https://knighthoot.app/api/searchcards',
 			      {method:'POST',body:js,headers:{'Content-Type':
 				      'application/json'}});
 			      let txt = await response.text();

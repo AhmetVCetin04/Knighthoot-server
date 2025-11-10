@@ -167,7 +167,7 @@ export default function CreateQuizPage() {
     try {
       setSubmitting(true);
       setMessage("");
-      const res = await authFetch("http://174.138.73.101:5173/api/test", {
+      const res = await authFetch("https://knighthoot.app/api/test", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
