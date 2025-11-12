@@ -1,0 +1,114 @@
+/* Make the page itself fill the viewport */
+html, body, #root { height: 100%; }
+body { margin: 0; }
+
+.reports-page {
+  min-height: 100vh;
+  padding: 24px;
+  display: grid;
+  place-items: start center;
+  background: #0b0d12;
+}
+
+.reports-card {
+  width: min(100%, 920px);
+  background: #121621;
+  border: 1px solid #232a3a;
+  border-radius: 16px;
+  padding: 20px;
+  color: #e9eef9;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+}
+
+.reports-top {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.muted { color: #98a2b3; }
+.error { color: #ff6b6b; }
+
+.empty {
+  padding: 24px;
+  text-align: center;
+  color: #98a2b3;
+}
+
+.report-list {
+  list-style: none;
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+}
+
+.report-item__btn {
+  width: 100%;
+  text-align: left;
+  background: #0f1320;
+  border: 1px solid #232a3a;
+  border-radius: 12px;
+  padding: 14px 16px;
+  color: inherit;
+  cursor: pointer;
+  transition: transform 0.05s ease, border-color 0.15s ease;
+}
+.report-item__btn:hover { border-color: #3a4a6b; transform: translateY(-1px); }
+
+.report-item__title {
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.report-item__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  display: inline-block;
+  border: 1px solid #2a3550;
+  background: #0f1526;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  color: #c3ccdb;
+}
+
+.qa-grid {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.qa-row {
+  border: 1px solid #232a3a;
+  border-radius: 12px;
+  padding: 12px;
+  background: #0f1320;
+}
+.qa-row.ok { border-color: #2f8f56; }
+.qa-row.bad { border-color: #9a3a3a; }
+
+.qa-q { margin-bottom: 6px; }
+.qa-a { display: grid; gap: 4px; }
+.qa-status { margin-top: 6px; font-weight: 700; }
+
+.actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.btn {
+  background: #0f1526;
+  border: 1px solid #2a3550;
+  color: #e9eef9;
+  border-radius: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+}
+.btn:hover { border-color: #3a4a6b; }

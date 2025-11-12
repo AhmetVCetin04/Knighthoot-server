@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import "../styles/CreateQuiz.css";
 
 type Question = {
   text: string;
@@ -21,6 +22,52 @@ function getAuthHeaders() {
     Authorization: `Bearer ${token}`,
     "x-access-token": token,
   };
+}
+
+// --- Helper: Numeric TID ---
+function getTeacherId(): string {
+  const token =
+    localStorage.getItem("token") ||
+    localStorage.getItem("accessToken") ||
+    sessionStorage.getItem("token");
+
+  if (token && token.includes(".")) {
+    try {
+      const json = JSON.parse(atob(token.split(".")[1]));
+      const raw =
+        json.TID ??
+        json.tid ??
+        json.teacherId ??
+        json.teacherID ??
+        json.uid ??
+        json.id ??
+        json.sub;
+      if (raw) return String(raw);
+    } catch {}
+  }
+
+  // Fallbacks if user info is stored separately
+  const storedUser =
+    localStorage.getItem("user") ||
+    sessionStorage.getItem("user") ||
+    localStorage.getItem("profile");
+  if (storedUser) {
+    try {
+      const u = JSON.parse(storedUser);
+      const raw =
+        u.TID ?? u.tid ?? u.teacherId ?? u.teacherID ?? u.uid ?? u.id;
+      if (raw) return String(raw);
+    } catch {}
+  }
+
+  // Direct stored key
+  const stored =
+    localStorage.getItem("TID") ||
+    localStorage.getItem("teacherId") ||
+    localStorage.getItem("userId");
+  if (stored) return stored;
+
+  throw new Error("No valid teacher ID found. Please re-login.");
 }
 
 export default function EditQuiz() {
@@ -100,23 +147,23 @@ export default function EditQuiz() {
   };
 
   // --- Submit updates ---
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
-    setError(null);
-    setSuccess(false);
+    const handleSubmit = async (e: React.FormEvent) => {
+      e.preventDefault();
+      setSaving(true);
+      setError(null);
+      setSuccess(false);
 
-    try {
-      const payload = {
-        TID: 1, // backend uses numeric TID
-        ID: title.trim(),
-        PIN: pin.trim(),
-        questions: questions.map((q) => ({
-          text: q.text,
-          options: q.options,
-          correctIndex: q.correctIndex,
-        })),
-      };
+      try {
+        const payload = {
+          TID: Number(getTeacherId()), 
+          ID: title.trim(),
+          PIN: pin.trim(),
+          questions: questions.map((q) => ({
+            text: q.text,
+            options: q.options,
+            correctIndex: q.correctIndex,
+          })),
+        };
 
       const res = await fetch(`/api/test/${encodeURIComponent(id!)}`, {
         method: "PUT",
@@ -140,7 +187,7 @@ export default function EditQuiz() {
 
       setSuccess(true);
       alert(json?.message || "Quiz updated successfully!");
-      navigate("/dashboard/teacher/myquizzes");
+      navigate("/dashboard/teacher/quizzes");
     } catch (e: any) {
       setError(e?.message || "Error updating quiz");
     } finally {
@@ -150,125 +197,159 @@ export default function EditQuiz() {
 
   if (loading) return <p className="p-6">Loading quiz...</p>;
 
+  // Find the original return block in EditQuiz.tsx and replace it entirely.
+
   return (
-    <div className="min-h-screen w-full bg-neutral-100 flex justify-center">
-      <div className="w-full max-w-3xl p-6">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-semibold">Edit Quiz</h1>
-          <button
-            className="px-3 py-2 rounded-xl bg-gray-200 hover:bg-gray-300 text-sm"
-            onClick={() => navigate(-1)}
-            type="button"
-          >
-            ← Back
-          </button>
+    <div className="create-quiz-container"> {/* Uses the wrapper class for consistency */}
+      
+      {/* PAGE HEADER */}
+      <h1 className="cq__page-title">Edit Quiz</h1>
+      <p className="cq__page-subtitle">
+        Update questions and options for this quiz.
+      </p>
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        
+        {/* QUIZ TITLE CARD */}
+        <div className="cq__card">
+          <label htmlFor="quiz-title" className="cq__label">
+            Quiz Title
+          </label>
+          <input
+            type="text"
+            id="quiz-title"
+            className="cq__input"
+            placeholder="Enter quiz title..."
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Title */}
-          <div>
-            <label className="block text-sm font-medium mb-1">Title</label>
-            <input
-              className="w-full rounded-xl border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-          </div>
+        {/* PIN CARD (NEW) */}
+        <div className="cq__card">
+          <label htmlFor="quiz-pin" className="cq__label">
+            PIN (Used for Starting Test)
+          </label>
+          <input
+            type="text"
+            id="quiz-pin"
+            className="cq__input"
+            value={pin}
+            onChange={(e) => setPin(e.target.value)}
+          />
+        </div>
 
-          {/* PIN */}
-          <div>
-            <label className="block text-sm font-medium mb-1">PIN</label>
-            <input
-              className="w-full rounded-xl border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
-              value={pin}
-              onChange={(e) => setPin(e.target.value)}
-            />
-          </div>
 
-          {/* Questions */}
-          <div className="space-y-5">
-            {questions.map((q, i) => (
-              <div
-                key={i}
-                className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm"
-              >
-                <div className="flex items-center justify-between mb-3">
-                  <h2 className="font-medium">Question {i + 1}</h2>
-                  <div className="flex items-center gap-2">
-                    <label className="text-sm">Answer:</label>
-                    <select
-                      className="rounded-lg border border-gray-300 px-2 py-1"
-                      value={q.correctIndex}
-                      onChange={(e) =>
-                        updateQuestion(i, { correctIndex: Number(e.target.value) })
-                      }
-                    >
-                      <option value={0}>A</option>
-                      <option value={1}>B</option>
-                      <option value={2}>C</option>
-                      <option value={3}>D</option>
-                    </select>
-                    <button
-                      type="button"
-                      onClick={() => removeQuestion(i)}
-                      className="text-sm text-red-600 hover:underline"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                </div>
-
-                <input
-                  className="w-full rounded-xl border border-gray-300 px-3 py-2 mb-3 focus:outline-none focus:ring-2 focus:ring-black"
-                  placeholder="Enter the question text"
-                  value={q.text}
-                  onChange={(e) => updateQuestion(i, { text: e.target.value })}
-                />
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {q.options.map((opt, j) => (
-                    <input
-                      key={j}
-                      className={`w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-2 ${
-                        q.correctIndex === j
-                          ? "border-emerald-500 ring-emerald-300"
-                          : "border-gray-300 focus:ring-black"
-                      }`}
-                      placeholder={`Option ${String.fromCharCode(65 + j)}`}
-                      value={opt}
-                      onChange={(e) => updateOption(i, j, e.target.value)}
-                    />
-                  ))}
-                </div>
+        {/* QUESTIONS MAPPING */}
+        {questions.map((q, i) => (
+          <div key={i} className="cq__card">
+            
+            {/* Question Header */}
+            <div className="cq__question-header" style={{ marginBottom: '16px' }}>
+              <h2 className="cq__question-title">Question {i + 1}</h2>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <label className="cq__label" style={{ margin: 0, fontSize: '15px' }}>
+                  Answer:
+                </label>
+                {/* Select dropdown (Styled by cq__input + inline styles) */}
+                <select
+                  className="cq__input" 
+                  style={{ width: 'auto', padding: '8px 12px' }}
+                  value={q.correctIndex}
+                  onChange={(e) =>
+                    updateQuestion(i, { correctIndex: Number(e.target.value) })
+                  }
+                >
+                  <option value={0}>Option 1</option>
+                  <option value={1}>Option 2</option>
+                  <option value={2}>Option 3</option>
+                  <option value={3}>Option 4</option>
+                </select>
+                <button
+                  type="button"
+                  className="cq__delete-btn"
+                  title="Remove Question"
+                  onClick={() => removeQuestion(i)}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                    <path d="M17 6h-4V5a3 3 0 0 0-3-3H9a3 3 0 0 0-3 3v1H2v2h2v11a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V8h2V6zM9 5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1H9V5zm9 13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V8h12v10z" />
+                  </svg>
+                </button>
               </div>
-            ))}
+            </div>
 
-            <button
-              type="button"
-              onClick={addQuestion}
-              className="w-full rounded-2xl border-2 border-dashed border-gray-300 py-3 hover:bg-gray-50"
-            >
-              + Add Question
-            </button>
-          </div>
+            {/* Question Text */}
+            <label htmlFor={`q${i}-text`} className="cq__label">
+              Question Text
+            </label>
+            <textarea
+              id={`q${i}-text`}
+              className="cq__input"
+              placeholder="Enter your question..."
+              value={q.text}
+              onChange={(e) => updateQuestion(i, { text: e.target.value })}
+            />
 
-          {/* Footer */}
-          <div className="flex items-center gap-3">
-            <button
-              disabled={saving}
-              className="rounded-xl bg-black text-white px-4 py-2 hover:opacity-90 disabled:opacity-60"
-              type="submit"
-            >
-              {saving ? "Saving..." : "Save Changes"}
-            </button>
-            {error && <span className="text-red-600 text-sm">{error}</span>}
-            {success && (
-              <span className="text-emerald-700 text-sm">✓ Saved</span>
-            )}
+            {/* Answer Options */}
+            <label className="cq__label" style={{ marginTop: '20px' }}>
+              Answer Options
+            </label>
+            <div className="cq__option-grid">
+              {q.options.map((opt, j) => (
+                <React.Fragment key={j}>
+                  <label htmlFor={`q${i}-op${j}`} className="cq__label">
+                    Option {j + 1}
+                  </label>
+                  <input
+                    type="text"
+                    id={`q${i}-op${j}`}
+                    className="cq__input"
+                    placeholder={`Enter option ${j + 1}...`}
+                    value={opt}
+                    onChange={(e) => updateOption(i, j, e.target.value)}
+                  />
+                </React.Fragment>
+              ))}
+            </div>
           </div>
-        </form>
-      </div>
+        ))}
+        
+        {/* ADD QUESTION BUTTON (Secondary style) */}
+        <button
+          type="button"
+          onClick={addQuestion}
+          className="cq__button cq__button--secondary"
+          style={{marginBottom: '24px'}}
+        >
+          + Add Question
+        </button>
+
+        {/* BOTTOM BUTTONS (Save/Cancel) */}
+        <div className="cq__button-bar">
+          <button
+            type="button"
+            className="cq__button cq__button--secondary"
+            onClick={() => navigate(-1)}
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={saving}
+            className="cq__button cq__button--primary"
+          >
+            {saving ? 'Saving…' : 'Save Changes'}
+          </button>
+        </div>
+        
+        {/* Status */}
+        <div className="flex items-center gap-3 mt-4">
+          {error && <span className="text-red-600 text-sm">{error}</span>}
+          {success && (
+            <span className="text-emerald-700 text-sm">✓ Saved</span>
+          )}
+        </div>
+      </form>
     </div>
   );
 }

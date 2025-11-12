@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-
+import "../styles/MyQuizzes.css";
 
 type Quiz = {
   id: string;
@@ -47,59 +47,87 @@ export default function MyQuizzes({
   const Empty = (
     <div className="qz-empty">
       <div className="qz-empty__icon" aria-hidden />
-      <h3>No quizzes yet</h3>
+      <h2>No quizzes yet</h2> 
       <p>Get started by creating your first quiz</p>
-      <button className="btn btn-gold" onClick={onCreate}>Create Your First Quiz</button>
+      <button className="btn btn-gold" onClick={onCreate}>
+        + Create New Quiz 
+      </button>
     </div>
   );
 
   return (
     <main className="qz-wrap">
-      {/* Header */}
-      <div className="qz-head">
-        <h1>My Quizzes</h1>
-        <button className="btn btn-gold" onClick={onCreate}>+ Create New Quiz</button>
+      {/* 1. Header (Simplified) */}
+      <div className="qz-head" style={{ marginBottom: '16px', alignItems: 'flex-start' }}>
+        {/* Title and Subtitle Block (Left Side - No button here anymore) */}
+        <div>
+          <h1 style={{ marginBottom: '4px' }}>My Quizzes</h1>
+          <p style={{ fontSize: '16px', color: '#a0a0a0', margin: '0' }}>
+            Manage and organize your quizzes
+          </p>
+        </div>
+        {/* The button has been moved into the toolbar below */}
       </div>
 
-      {/* Toolbar */}
+      {/* 2. Toolbar (New Two-Row Structure) */}
       <div className="qz-toolbar">
-        <div className="qz-search">
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search quizzes..."
-            aria-label="Search quizzes"
-          />
+        
+        {/* TOP ROW: Search + Create Button */}
+        <div className="qz-toolbar__top-row">
+          <div className="qz-search">
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search quizzes..."
+              aria-label="Search quizzes"
+            />
+          </div>
+          {/* ⬅️ CREATE BUTTON MOVED HERE, next to Search */}
+          <button className="btn btn-gold qz-create-btn" onClick={onCreate}>
+            + Create New Quiz
+          </button>
         </div>
 
-        <div className="qz-sort">
-          <label>Sort by:</label>
-          <select value={sort} onChange={(e) => setSort(e.target.value as any)}>
-            <option value="new">Date (Newest First)</option>
-            <option value="old">Date (Oldest First)</option>
-            <option value="a">Title (A–Z)</option>
-            <option value="z">Title (Z–A)</option>
-          </select>
-        </div>
-
-        <div className="qz-view">
-          <span>View:</span>
-          <button
-            className={`icon-btn ${view === "grid" ? "is-active" : ""}`}
-            onClick={() => setView("grid")}
-            aria-pressed={view === "grid"}
-            title="Grid view"
-          >
-            {/* <IconGrid /> */}▦
-          </button>
-          <button
-            className={`icon-btn ${view === "list" ? "is-active" : ""}`}
-            onClick={() => setView("list")}
-            aria-pressed={view === "list"}
-            title="List view"
-          >
-            {/* <IconList /> */}≣
-          </button>
+        {/* BOTTOM ROW: Sort + View Controls */}
+        <div className="qz-toolbar__bottom-row">
+          
+          {/* SORT BY (Left) */}
+          <div className="qz-sort">
+            {/* ⬅️ Adding visual icon/picture next to Sort Label */}
+            <label style={{ marginRight: '6px' }}>
+              Sort by: <span style={{ marginRight: '2px' }}></span>
+            </label>
+            <select value={sort} onChange={(e) => setSort(e.target.value as any)}>
+              <option value="new">Date (Newest First)</option>
+              <option value="old">Date (Oldest First)</option>
+              <option value="a">Title (A–Z)</option>
+              <option value="z">Title (Z–A)</option>
+            </select>
+          </div>
+          
+          {/* VIEW CONTROLS (Right - in a box) */}
+          <div className="qz-view">
+            <span>View:</span>
+            {/* ⬅️ New Box Wrapper for Icons */}
+            <div className="qz-view__box">
+              <button
+                className={`icon-btn ${view === "grid" ? "is-active" : ""}`}
+                onClick={() => setView("grid")}
+                aria-pressed={view === "grid"}
+                title="Grid view"
+              >
+                {/* <IconGrid /> */}▦
+              </button>
+              <button
+                className={`icon-btn ${view === "list" ? "is-active" : ""}`}
+                onClick={() => setView("list")}
+                aria-pressed={view === "list"}
+                title="List view"
+              >
+                {/* <IconList /> */}≣
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -123,7 +151,7 @@ export default function MyQuizzes({
               </div>
               <div className="qz-card__actions">
                 <button
-                  className="btn btn-gold"
+                  className="btn btn-gold btn-sm"
                   onClick={(e) => {
                     e.stopPropagation(); 
                     onEdit?.(q.id);

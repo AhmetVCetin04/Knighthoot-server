@@ -26,22 +26,58 @@ function getAuthHeaders() {
 
 // --- Helper: Numeric TID (matches backend) ---
 function getTeacherId(): string {
+  // Try to decode from token first
+  const token =
+    localStorage.getItem("token") ||
+    localStorage.getItem("accessToken") ||
+    sessionStorage.getItem("token");
+
+  if (token && token.includes(".")) {
+    try {
+      const json = JSON.parse(atob(token.split(".")[1]));
+      const raw =
+        json.TID ??
+        json.tid ??
+        json.teacherId ??
+        json.teacherID ??
+        json.uid ??
+        json.id ??
+        json.sub;
+      if (raw) return String(raw);
+    } catch {}
+  }
+
+  // Fallbacks if user info is stored separately
+  const storedUser =
+    localStorage.getItem("user") ||
+    sessionStorage.getItem("user") ||
+    localStorage.getItem("profile");
+  if (storedUser) {
+    try {
+      const u = JSON.parse(storedUser);
+      const raw =
+        u.TID ?? u.tid ?? u.teacherId ?? u.teacherID ?? u.uid ?? u.id;
+      if (raw) return String(raw);
+    } catch {}
+  }
+
+  // Direct stored key
   const stored =
     localStorage.getItem("TID") ||
     localStorage.getItem("teacherId") ||
     localStorage.getItem("userId");
-  if (stored && !isNaN(Number(stored))) return stored;
-  return "1";
+  if (stored) return stored;
+
+  throw new Error("No valid teacher ID found. Please re-login.");
 }
+
 
 // --- Map backend tests into frontend quizzes ---
 function mapTests(raw: ApiTest[]): Quiz[] {
   return (raw || []).map((t) => {
-    const id = String(t.ID ?? t._id ?? crypto.randomUUID());
+    const rawId = String(t.ID ?? t._id ?? crypto.randomUUID());
 
-    // Clean display name: remove timestamp and format nicely
-    const rawTitle = String(t.ID ?? "Untitled Quiz");
-    const cleanTitle = rawTitle
+    const cleanTitle = rawId
       .replace(/[-_][0-9]{10,20}$/, "") // remove trailing timestamp
       .replace(/[-_]+$/, "") // remove trailing dashes
       .replace(/[-_]+/g, " ") // replace dashes with spaces
@@ -58,8 +94,8 @@ function mapTests(raw: ApiTest[]): Quiz[] {
       t.createdAt || t.created_at || t.date || new Date().toISOString();
 
     return {
-      id,
-      title: cleanTitle,
+      id: rawId, 
+      title: cleanTitle, 
       questions: qCount,
       createdAt: new Date(created).toISOString(),
     };
@@ -132,31 +168,7 @@ export default function MyQuizzesPage() {
   // --- Main UI ---
   return (
     <>
-      {/* Debug info */}
-      <div
-        style={{
-          padding: 10,
-          margin: "8px 16px",
-          background: "#f6f6f6",
-          borderRadius: 8,
-          fontSize: 12,
-        }}
-      >
-        <div>
-          <b>Endpoint:</b> <code>{debug.used}</code>
-        </div>
-        <div>
-          <b>Items:</b> {debug.count ?? 0}
-        </div>
-        {debug.sample && (
-          <details style={{ marginTop: 4 }}>
-            <summary>Show first raw item keys</summary>
-            <code style={{ display: "block", whiteSpace: "pre-wrap" }}>
-              {JSON.stringify(Object.keys(debug.sample), null, 2)}
-            </code>
-          </details>
-        )}
-      </div>
+      
 
       <MyQuizzes
         quizzes={quizzes}
@@ -177,11 +189,12 @@ export default function MyQuizzesPage() {
             const newTestID = `${baseName}-${Date.now()}`;
             const newPIN = Math.floor(1000 + Math.random() * 9000).toString();
 
+            // 1. API Call
             const res = await fetch("/api/test/duplicate", {
               method: "POST",
               headers: getAuthHeaders(),
               body: JSON.stringify({
-                TID: 1,
+                TID: Number(getTeacherId()),
                 originalTestID: originalId,
                 newTestID,
                 newPIN,
@@ -195,31 +208,33 @@ export default function MyQuizzesPage() {
             } catch {}
 
             if (!res.ok) {
-              const msg =
-                (json && (json.error || json.message)) ||
-                text ||
-                `Failed (${res.status})`;
+              const msg = (json && (json.error || json.message)) || text || `Failed (${res.status})`;
               alert(msg);
               return;
             }
 
             alert(json?.message || "Test duplicated successfully!");
 
-            // Update UI
             if (json?.test) {
+              const newRawId = json.test.ID;
+              
+              // Replicate the title cleaning logic from mapTests for the new quiz title:
+              const cleanTitle = newRawId
+                .replace(/[-_][0-9]{10,20}$/, "")
+                .replace(/[-_]+/g, " ")
+                .replace(/\b\w/g, (c) => c.toUpperCase());
+                
               setQuizzes((prev) => [
                 ...prev,
                 {
-                  id: json.test.ID,
-                  title: json.test.ID
-                    .replace(/[-_][0-9]{10,20}$/, "")
-                    .replace(/[-_]+/g, " ")
-                    .replace(/\b\w/g, (c) => c.toUpperCase()),
+                  id: newRawId, // Keep the full raw ID
+                  title: cleanTitle, // Use the cleaned title for display
                   questions: json.test.questions?.length ?? 0,
                   createdAt: new Date().toISOString(),
                 },
               ]);
             }
+            
           } catch (e: any) {
             alert(e?.message || "Error duplicating test");
           }
@@ -229,10 +244,14 @@ export default function MyQuizzesPage() {
           if (!window.confirm("Are you sure you want to delete this test?")) return;
 
           try {
+            const teacherId = getTeacherId();
+
             const res = await fetch(`/api/test/${encodeURIComponent(id)}`, {
               method: "DELETE",
               headers: getAuthHeaders(),
-              body: JSON.stringify({ TID: 1 }),
+              body: JSON.stringify({ 
+                  TID: Number(teacherId) 
+              }), 
             });
 
             const text = await res.text();
@@ -241,17 +260,18 @@ export default function MyQuizzesPage() {
               json = text ? JSON.parse(text) : null;
             } catch {}
 
-            if (!res.ok) {
-              const msg =
-                (json && (json.error || json.message)) ||
-                text ||
-                `Failed to delete (${res.status})`;
-              alert(msg);
+            if (res.ok) { 
+              alert(json?.message || "Test deleted successfully!");
+              setQuizzes((prev) => prev.filter((q) => q.id !== id));
               return;
             }
 
-            alert(json?.message || "Test deleted successfully!");
-            setQuizzes((prev) => prev.filter((q) => q.id !== id));
+            const msg =
+              (json && (json.error || json.message)) ||
+              text ||
+              `Failed to delete (${res.status})`;
+            alert(msg);
+
           } catch (e: any) {
             alert(e?.message || "Error deleting test");
           }

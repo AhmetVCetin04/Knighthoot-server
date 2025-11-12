@@ -1,0 +1,273 @@
+/* site background already on <main class="site-bg"> */
+.site-bg {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* The main container remains the same */
+.student-page {
+  height: 100vh;
+  overflow: hidden;
+  padding: 0 16px 0;
+  display: grid;
+  place-items: center;
+  background: #0a0a0a;
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+}
+ 
+/* ===== Header (used in EnterAccessCode) ===== */
+.student-live-header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 77px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  background: #232323;
+  border-bottom: 1px solid rgba(255, 255, 255, .08);
+  padding: 0 20px;
+  z-index: 10;
+  color: #e7e7e7;
+}
+
+.student-live-header__left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 700;
+}
+
+/* Used for branding in fixed header */
+.student-live-header__brand {
+  font-family: "Oswald", "Montserrat", sans-serif;
+  font-size: 26px;
+  color: #d5ac16;
+}
+
+.student-live-header__right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.back-btn {
+  background: none;
+  border: none;
+  color: #fff; 
+  font-size: 18px;
+  font-weight: 550;
+  cursor: pointer;
+}
+
+/* ===== CARD STYLES (used in EnterAccessCode) ===== */
+.student-card {
+  width: min(420px, 92vw); 
+  background: #232323; 
+  border: 1px solid #3d3d3d; 
+  border-radius: 10px; 
+  padding: 0; 
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+  text-align: center;
+}
+
+/* Inner card sections for structure and dividers */
+.student-card-section {
+    padding: 20px 24px;
+}
+
+/* Input and Button Styles */
+.input-group {
+    padding: 0 24px 24px;
+    text-align: left;
+}
+.access-code-label {
+    display: block;
+    padding-bottom: 24px;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: #fff;
+}
+.student-input {
+  width: 100%;
+  padding: 14px 16px; 
+  border-radius: 6px; 
+  border: 1px solid #4a4a4a; 
+  background: #141414; 
+  color: #fff;
+  margin: 0; 
+  box-sizing: border-box;
+  text-align: center; 
+  font-size: 18px;
+  text-transform: uppercase; 
+}
+
+.student-btn {
+  display: block; 
+  width: calc(100% - 48px); 
+  margin: 0 24px 24px; 
+  padding: 12px 16px;
+  border-radius: 6px;
+  border: 0;
+  background: #c7a144; 
+  color: #111;
+  font-weight: 700;
+  font-size: 18px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.student-error, .error-message { color: #ff6b6b; margin-top: 12px; }
+
+/* Small Spinner (used in EnterAccessCode) */
+.spinner {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 3px solid #444; border-top-color: #c7a144;
+  animation: spin 0.7s linear infinite; margin: 14px 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+
+/* ==================================== */
+/* ===== NEW WAITING ROOM STYLES ====== */
+/* ==================================== */
+
+.waiting-room-page {
+    /* Overrides grid placement for a flex column layout */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding-top: 50px;
+    padding-bottom: 70px; /* Space for the fixed footer */
+    position: relative; /* Needed for absolute positioning of footer */
+}
+
+.waiting-header {
+    text-align: center;
+    margin-bottom: 40px;
+    margin-top: -80px; /* Pull the title up slightly to center the card */
+}
+
+/* Brand style for the centralized title in the waiting room */
+.knighthoot-brand {
+    font-family: "Oswald", "Montserrat", sans-serif;
+    font-size: 48px; 
+    color: #ffd700; /* Gold */
+    font-weight: 700;
+    line-height: 1;
+}
+
+.get-ready-text {
+    font-size: 20px;
+    color: #e7e7e7;
+    margin-top: 8px;
+}
+
+/* Card adjustments for the waiting room - matches Figma's dark gray box */
+.waiting-card {
+    width: min(500px, 92vw); 
+    background: #232323;
+    border: none;
+    border-radius: 12px;
+    padding: 30px 40px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #fff;
+    flex-grow: 0;
+}
+
+/* Large Spinner (Reuses @keyframes spin) */
+.spinner-lg {
+    width: 60px; height: 60px; border-radius: 50%;
+    border: 6px solid #3d3d3d; /* Dark gray for the base */
+    border-top-color: #ffd700; /* Yellow/Gold for animation */
+    animation: spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite; 
+    margin-bottom: 30px;
+}
+
+.waiting-message-block {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.waiting-card h2 {
+    font-size: 30px;
+    margin: 0 0 8px;
+    color: #fff;
+    text-align: center;
+}
+
+.waiting-message-block .instructions {
+    font-size: 18px;
+    color: #aaa;
+    text-align: center;
+    margin: 0;
+}
+
+/* Info Box/Details Section */
+.lobby-info-box {
+    width: 100%;
+    background: #1a1a1a; /* Darker background for the info strip */
+    border-radius: 4px; /* Slightly smaller radius for the inner box */
+    padding: 20px 24px;
+    margin-bottom: 30px;
+}
+
+.lobby-info-item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column; /* Stack label and value */
+    padding: 8px 0;
+}
+
+.info-label {
+    font-size: 16px;
+    font-weight: 500;
+    color: #aaa;
+    margin: 0 0 8px;
+}
+
+.info-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #ffd700; /* Gold color for the code */
+    margin: 0;
+}
+
+/* Leave Lobby Button - matches Figma's style */
+.leave-lobby-btn {
+    background: none;
+    border: none;
+    color: #888; /* Gray text */
+    font-size: 16px;
+    font-weight: 600;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: color 0.2s;
+    margin-top: 10px;
+}
+
+.leave-lobby-btn:hover {
+    color: #fff;
+}
+
+/* Footer text */
+.waiting-footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    text-align: center;
+    padding: 15px 20px;
+    background: #1a1a1a;
+    color: #888;
+    font-size: 14px;
+    border-top: 1px solid #333;
+    z-index: 10;
+}

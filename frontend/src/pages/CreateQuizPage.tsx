@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import "../styles/CreateQuiz.css";
 
 // --- Types (UI only) ---
 type Question = {
@@ -23,6 +24,60 @@ function getAuthHeaders() {
     Authorization: `Bearer ${token}`,
     'x-access-token': token, // cover both common patterns
   };
+}
+
+function getTeacherTID(): number {
+  // 1) Where the token might be stored
+  const token =
+    localStorage.getItem('token') ||
+    localStorage.getItem('accessToken') ||
+    sessionStorage.getItem('token');
+
+  if (token && token.includes('.')) {
+    try {
+      const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+      const json = JSON.parse(atob(base64));
+      // Common claim names your backend might use:
+      const raw =
+        json.TID ??
+        json.tid ??
+        json.teacherId ??
+        json.teacherID ??
+        json.uid ??
+        json.id ??
+        json.sub;
+      const asNum = Number(raw);
+      if (!Number.isNaN(asNum)) return asNum;
+    } catch {
+    }
+  }
+
+  const storedUser =
+    localStorage.getItem('user') ||
+    sessionStorage.getItem('user') ||
+    localStorage.getItem('profile');
+
+  if (storedUser) {
+    try {
+      const u = JSON.parse(storedUser);
+      const raw =
+        u.TID ?? u.tid ?? u.teacherId ?? u.teacherID ?? u.uid ?? u.id;
+      const asNum = Number(raw);
+      if (!Number.isNaN(asNum)) return asNum;
+    } catch {
+    }
+  }
+
+  const direct = Number(
+    localStorage.getItem('TID') ||
+      localStorage.getItem('teacherId') ||
+      sessionStorage.getItem('TID')
+  );
+  if (!Number.isNaN(direct)) return direct;
+
+  throw new Error(
+    'Could not determine your Teacher ID (TID). Please re-login so your TID is available.'
+  );
 }
 
 // Helper: make a simple ID from the title + timestamp if you don't have one yet
@@ -112,8 +167,7 @@ export default function CreateQuiz() {
     }
 
     // ====== Map UI -> Backend expected payload ======
-    // Backend requires: { TID (number), ID (string), questions }
-    const TID = 1; 
+    const TID = getTeacherTID();
     const ID = makeQuizIdFromTitle(title);
 
     const payload = {
@@ -153,118 +207,145 @@ export default function CreateQuiz() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-neutral-100 flex justify-center">
-      <div className="w-full max-w-3xl p-6">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-semibold">Create a Quiz</h1>
-          <button
-            className="px-3 py-2 rounded-xl bg-gray-200 hover:bg-gray-300 text-sm"
-            onClick={() => navigate(-1)}
-            type="button"
-          >
-            ← Back
-          </button>
+    <div className="create-quiz-container">
+      {/* PAGE HEADER */}
+      <h1 className="cq__page-title">Create New Quiz</h1>
+      <p className="cq__page-subtitle">
+        Design your quiz with multiple choice questions
+      </p>
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* QUIZ TITLE CARD */}
+        <div className="cq__card">
+          <label htmlFor="quiz-title" className="cq__label">
+            Quiz Title
+          </label>
+          <input
+            type="text"
+            id="quiz-title"
+            className="cq__input"
+            placeholder="Enter quiz title..."
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Title */}
-          <div>
-            <label className="block text-sm font-medium mb-1">Title</label>
-            <input
-              className="w-full rounded-xl border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
-              placeholder="e.g., UCF History Quiz"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-          </div>
+        {/* QUESTIONS MAPPING */}
+        {questions.map((q, i) => {
+          const selectId = `q${i}-correct`; // for label/select association
 
-          {/* Questions */}
-          <div className="space-y-5">
-            {questions.map((q, i) => (
-              <div
-                key={i}
-                className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm"
-              >
-                <div className="flex items-center justify-between mb-3">
-                  <h2 className="font-medium">Question {i + 1}</h2>
-                  <div className="flex items-center gap-2">
-                    <label className="text-sm">Answer:</label>
-                    <select
-                      className="rounded-lg border border-gray-300 px-2 py-1"
-                      value={q.correctIndex}
-                      onChange={(e) =>
-                        updateQuestion(i, { correctIndex: Number(e.target.value) })
-                      }
+          return (
+            <div key={i} className="cq__card">
+              {/* Question Header */}
+              <div className="cq__question-header" style={{ marginBottom: '16px' }}>
+                <h2 className="cq__question-title">Question {i + 1}</h2>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <label
+                    htmlFor={selectId}
+                    className="cq__label"
+                    style={{ margin: 0, fontSize: '15px' }}
+                  >
+                    Answer:
+                  </label>
+                  <select
+                    id={selectId}
+                    className="cq__input"
+                    style={{ width: 'auto', padding: '8px 12px' }}
+                    value={q.correctIndex}
+                    onChange={(e) =>
+                      updateQuestion(i, { correctIndex: Number(e.target.value) })
+                    }
+                  >
+                    <option value={0}>Option 1</option>
+                    <option value={1}>Option 2</option>
+                    <option value={2}>Option 3</option>
+                    <option value={3}>Option 4</option>
+                  </select>
+                  <button
+                    type="button"
+                    className="cq__delete-btn"
+                    title="Delete Question"
+                    onClick={() => removeQuestion(i)}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      width="20"
+                      height="20"
                     >
-                      <option value={0}>A</option>
-                      <option value={1}>B</option>
-                      <option value={2}>C</option>
-                      <option value={3}>D</option>
-                    </select>
-                    <button
-                      type="button"
-                      onClick={() => removeQuestion(i)}
-                      className="text-sm text-red-600 hover:underline"
-                    >
-                      Remove
-                    </button>
-                  </div>
+                      <path d="M17 6h-4V5a3 3 0 0 0-3-3H9a3 3 0 0 0-3 3v1H2v2h2v11a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V8h2V6zM9 5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1H9V5zm9 13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V8h12v10z" />
+                    </svg>
+                  </button>
                 </div>
+              </div>
 
-                <input
-                  className="w-full rounded-xl border border-gray-300 px-3 py-2 mb-3 focus:outline-none focus:ring-2 focus:ring-black"
-                  placeholder="Enter the question text"
-                  value={q.text}
-                  onChange={(e) => updateQuestion(i, { text: e.target.value })}
-                />
+              {/* Question Text */}
+              <label htmlFor={`q${i}-text`} className="cq__label">
+                Question Text
+              </label>
+              <textarea
+                id={`q${i}-text`}
+                className="cq__input"
+                placeholder="Enter your question..."
+                value={q.text}
+                onChange={(e) => updateQuestion(i, { text: e.target.value })}
+              />
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {q.options.map((opt, j) => (
+              {/* Answer Options */}
+              <label className="cq__label" style={{ marginTop: '20px' }}>
+                Answer Options
+              </label>
+              <div className="cq__option-grid">
+                {q.options.map((opt, j) => (
+                  <React.Fragment key={j}>
+                    <label htmlFor={`q${i}-op${j}`} className="cq__label">
+                      Option {j + 1}
+                    </label>
                     <input
-                      key={j}
-                      className={`w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-2 ${
-                        q.correctIndex === j
-                          ? 'border-emerald-500 ring-emerald-300'
-                          : 'border-gray-300 focus:ring-black'
-                      }`}
-                      placeholder={`Option ${String.fromCharCode(65 + j)}`}
+                      type="text"
+                      id={`q${i}-op${j}`}
+                      className="cq__input"
+                      placeholder={`Enter option ${j + 1}...`}
                       value={opt}
                       onChange={(e) => updateOption(i, j, e.target.value)}
                     />
-                  ))}
-                </div>
+                  </React.Fragment>
+                ))}
               </div>
-            ))}
+            </div>
+          );
+        })}
 
-            <button
-              type="button"
-              onClick={addQuestion}
-              className="w-full rounded-2xl border-2 border-dashed border-gray-300 py-3 hover:bg-gray-50"
-            >
-              + Add Question
-            </button>
-          </div>
+        {/* ADD QUESTION BUTTON */}
+        <button
+          type="button"
+          onClick={addQuestion}
+          className="cq__button cq__button--secondary"
+        >
+          + Add Question
+        </button>
 
-          {/* Form footer */}
-          <div className="flex items-center gap-3">
-            <button
-              disabled={saving}
-              className="rounded-xl bg-black text-white px-4 py-2 hover:opacity-90 disabled:opacity-60"
-              type="submit"
-            >
-              {saving ? 'Saving…' : 'Save Quiz'}
-            </button>
-            {error && <span className="text-red-600 text-sm">{error}</span>}
-            {successPin && (
-              <span className="text-emerald-700 text-sm">
-                Saved!{' '}
-                {successPin !== '✓ Saved' ? `PIN: ${successPin}` : successPin}
-              </span>
-            )}
-          </div>
-        </form>
-      </div>
+        {/* BOTTOM BUTTONS */}
+        <div className="cq__button-bar">
+          <button
+            type="button"
+            className="cq__button cq__button--secondary"
+            onClick={() => navigate(-1)}
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={saving}
+            className="cq__button cq__button--primary"
+          >
+            {saving ? 'Saving…' : 'Save Quiz'}
+          </button>
+        </div>
+
+        {/* Form Status... */}
+      </form>
     </div>
   );
 }

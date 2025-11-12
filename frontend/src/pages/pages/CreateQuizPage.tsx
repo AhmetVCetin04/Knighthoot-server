@@ -1,342 +1,324 @@
-import React, { useMemo, useState } from "react";
-import "../styles/CreateQuiz.css";
-import picture from "../assets/picture.png";
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-function getTokenFromStorage(): string | null {
-  // try user_data first (since you already use it for TID)
-  try {
-    const raw = localStorage.getItem("user_data");
-    if (raw) {
-      const u = JSON.parse(raw);
-      return u.token || u.jwt || u.accessToken || u.authToken || null;
+// --- Types (UI only) ---
+type Question = {
+  text: string;
+  options: string[]; // fixed 4 options for now
+  correctIndex: number; // 0..3
+};
+
+// Helper: build safe headers with auth token (auth middleware requires a token)
+function getAuthHeaders() {
+  const token =
+    localStorage.getItem('token') ||
+    localStorage.getItem('accessToken') ||
+    sessionStorage.getItem('token');
+
+  if (!token)
+    throw new Error('Not authenticated — missing token. Please log in first.');
+
+  return {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${token}`,
+    'x-access-token': token, // cover both common patterns
+  };
+}
+
+function getTeacherTID(): number {
+  // 1) Where the token might be stored
+  const token =
+    localStorage.getItem('token') ||
+    localStorage.getItem('accessToken') ||
+    sessionStorage.getItem('token');
+
+  if (token && token.includes('.')) {
+    try {
+      const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+      const json = JSON.parse(atob(base64));
+      // Common claim names your backend might use:
+      const raw =
+        json.TID ??
+        json.tid ??
+        json.teacherId ??
+        json.teacherID ??
+        json.uid ??
+        json.id ??
+        json.sub;
+      const asNum = Number(raw);
+      if (!Number.isNaN(asNum)) return asNum;
+    } catch {
     }
-  } catch {}
-  // fallbacks (in case login stored token separately)
-  return (
-    localStorage.getItem("authToken") ||
-    localStorage.getItem("token") ||
-    localStorage.getItem("accessToken") ||
-    localStorage.getItem("jwt") ||
-    null
+  }
+
+  const storedUser =
+    localStorage.getItem('user') ||
+    sessionStorage.getItem('user') ||
+    localStorage.getItem('profile');
+
+  if (storedUser) {
+    try {
+      const u = JSON.parse(storedUser);
+      const raw =
+        u.TID ?? u.tid ?? u.teacherId ?? u.teacherID ?? u.uid ?? u.id;
+      const asNum = Number(raw);
+      if (!Number.isNaN(asNum)) return asNum;
+    } catch {
+    }
+  }
+
+  const direct = Number(
+    localStorage.getItem('TID') ||
+      localStorage.getItem('teacherId') ||
+      sessionStorage.getItem('TID')
+  );
+  if (!Number.isNaN(direct)) return direct;
+
+  throw new Error(
+    'Could not determine your Teacher ID (TID). Please re-login so your TID is available.'
   );
 }
 
-function buildAuthHeaders(init: RequestInit = {}) {
-  const headers = new Headers(init.headers || {});
-  headers.set("Content-Type", "application/json");
-  const token = getTokenFromStorage();
-  if (token) {
-    // cover common backends without changing server code
-    headers.set("Authorization", `Bearer ${token}`);
-    headers.set("x-auth-token", token);
-    headers.set("x-access-token", token);
-  }
-  return headers;
+// Helper: make a simple ID from the title + timestamp if you don't have one yet
+function makeQuizIdFromTitle(t: string) {
+  const slug = (t || 'quiz')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+    .slice(0, 40);
+  const stamp = new Date()
+    .toISOString()
+    .replace(/[-:.TZ]/g, '')
+    .slice(0, 14); // yyyymmddhhmmss
+  return `${slug || 'quiz'}-${stamp}`;
 }
 
-async function authFetch(input: RequestInfo, init: RequestInit = {}) {
-  const headers = buildAuthHeaders(init);
-  return fetch(input, { ...init, headers, credentials: "include" });
-}
+export default function CreateQuiz() {
+  const navigate = useNavigate();
 
-
-type Option = { text?: string; imageUrl?: string };
-type Question = { question?: string; imageUrl?: string; options: Option[]; answer: number };
-
-export default function CreateQuizPage() {
-  const [testId, setTestId] = useState("");
+  const [title, setTitle] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [successPin, setSuccessPin] = useState<string | null>(null);
   const [questions, setQuestions] = useState<Question[]>([
-    { question: "", imageUrl: "", options: [{ text: "" }, { text: "" }], answer: 0 }
+    { text: '', options: ['', '', '', ''], correctIndex: 0 },
   ]);
-  const [submitting, setSubmitting] = useState(false);
-  const [message, setMessage] = useState("");
 
-  const teacherId = useMemo(() => {
-    const raw = localStorage.getItem("user_data");
-    try { return raw ? JSON.parse(raw).id ?? JSON.parse(raw).TID ?? 0 : 0; } catch { return 0; }
-  }, []);
+  // Helpers
+  const updateQuestion = (idx: number, patch: Partial<Question>) => {
+    setQuestions((qs) =>
+      qs.map((q, i) => (i === idx ? { ...q, ...patch } : q))
+    );
+  };
 
-  /* ---------- helpers ---------- */
+  const updateOption = (qIdx: number, optIdx: number, value: string) => {
+    setQuestions((qs) =>
+      qs.map((q, i) =>
+        i === qIdx
+          ? {
+              ...q,
+              options: q.options.map((o, j) =>
+                j === optIdx ? value : o
+              ),
+            }
+          : q
+      )
+    );
+  };
 
-  // common: read file -> dataURL -> set into state (so backend can store it;
-  // you can later swap to uploading to S3 and storing a URL instead)
-  async function fileToDataUrl(file: File): Promise<string> {
-    return await new Promise((resolve, reject) => {
-      const fr = new FileReader();
-      fr.onload = () => resolve(String(fr.result || ""));
-      fr.onerror = reject;
-      fr.readAsDataURL(file);
-    });
-  }
+  const addQuestion = () => {
+    setQuestions((qs) => [
+      ...qs,
+      { text: '', options: ['', '', '', ''], correctIndex: 0 },
+    ]);
+  };
 
-  function setQuestionField(qIdx: number, field: "question"|"imageUrl", value: string) {
-    setQuestions(prev => prev.map((q,i) => {
-      if (i !== qIdx) return q;
-      if (field === "question" && value) return { ...q, question: value, imageUrl: "" };
-      if (field === "imageUrl" && value) return { ...q, imageUrl: value, question: "" };
-      return { ...q, [field]: value };
-    }));
-  }
+  const removeQuestion = (idx: number) => {
+    setQuestions((qs) => qs.filter((_, i) => i !== idx));
+  };
 
-  async function setQuestionImageFromFile(qIdx: number, file: File | null) {
-    if (!file) return;
-    const dataUrl = await fileToDataUrl(file);
-    setQuestionField(qIdx, "imageUrl", dataUrl);     // sets image and clears text
-  }
-
-  function setOptionField(qIdx:number,oIdx:number,field:"text"|"imageUrl",value:string){
-    setQuestions(prev => prev.map((q,i)=>{
-      if(i!==qIdx) return q;
-      const options = q.options.map((opt,j)=>{
-        if(j!==oIdx) return opt;
-        if(field==="text" && value) return { text:value, imageUrl:"" };
-        if(field==="imageUrl" && value) return { imageUrl:value, text:"" };
-        return { ...opt, [field]: value };
-      });
-      return { ...q, options };
-    }));
-  }
-
-  async function setOptionImageFromFile(qIdx: number, oIdx: number, file: File | null) {
-    if (!file) return;
-    const dataUrl = await fileToDataUrl(file);
-    setOptionField(qIdx, oIdx, "imageUrl", dataUrl); // sets image and clears text
-  }
-
-  function setAnswer(qIdx: number, aIdx: number) {
-    setQuestions(prev => prev.map((q,i) => i === qIdx ? { ...q, answer: aIdx } : q));
-  }
-
-  function toggleOptionCount(qIdx: number, count: 2|4) {
-    setQuestions(prev => prev.map((q,i) => {
-      if (i !== qIdx) return q;
-      let next = q.options.slice(0, count);
-      while (next.length < count) next.push({ text: "" });
-      const nextAnswer = Math.min(q.answer ?? 0, count - 1);
-      return { ...q, options: next, answer: nextAnswer };
-    }));
-  }
-
-  function addQuestion() {
-    setQuestions(prev => [...prev, { question: "", imageUrl: "", options: [{ text: "" }, { text: "" }], answer: 0 }]);
-  }
-
-  function removeQuestion(idx: number) {
-    setQuestions(prev => prev.length > 1 ? prev.filter((_,i) => i !== idx) : prev);
-  }
-
-  function validate(): string | null {
-    if (!testId.trim()) return "Please enter a Quiz/Test ID.";
+  // Simple validation (client-side)
+  const validate = () => {
+    if (!title.trim()) return 'Please enter a quiz title.';
+    if (questions.length === 0) return 'Add at least one question.';
     for (let i = 0; i < questions.length; i++) {
       const q = questions[i];
-      const hasQ = (q.question?.trim() ?? "") !== "" || (q.imageUrl?.trim() ?? "") !== "";
-      if (!hasQ) return `Question ${i+1}: enter text or choose an image.`;
-      if (q.question && q.imageUrl) return `Question ${i+1}: choose text OR image (not both).`;
-      if (!q.options || q.options.length < 2) return `Question ${i+1}: must have 2 or 4 options.`;
+      if (!q.text.trim()) return `Question ${i + 1} is empty.`;
       for (let j = 0; j < q.options.length; j++) {
-        const o = q.options[j];
-        const hasO = (o.text?.trim() ?? "") !== "" || (o.imageUrl?.trim() ?? "") !== "";
-        if (!hasO) return `Question ${i+1}, option ${j+1}: enter text or choose an image.`;
-        if (o.text && o.imageUrl) return `Question ${i+1}, option ${j+1}: choose text OR image (not both).`;
+        if (!q.options[j].trim())
+          return `Question ${i + 1} option ${j + 1} is empty.`;
       }
-      if (q.answer == null || q.answer < 0 || q.answer >= q.options.length)
-        return `Question ${i+1}: pick a correct option.`;
+      if (q.correctIndex < 0 || q.correctIndex > 3)
+        return `Question ${i + 1} has an invalid correct option.`;
     }
     return null;
-  }
+  };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setSuccessPin(null);
 
-  async function saveQuiz() {
-    const err = validate();
-    if (err) { setMessage(err); return; }
+    const v = validate();
+    if (v) {
+      setError(v);
+      return;
+    }
+
+    // ====== Map UI -> Backend expected payload ======
+    // Backend requires: { TID (number), ID (string), questions }
+    const TID = getTeacherTID();; 
+    const ID = makeQuizIdFromTitle(title);
 
     const payload = {
-      TID: Number(teacherId) || 0,
-      ID: testId.trim(),
-      questions: questions.map(q => ({
-        question: q.question?.trim() || undefined,
-        imageUrl: q.imageUrl?.trim() || undefined,   // dataURL if chosen via file
-        options: q.options.map(o => ({
-          text: o.text?.trim() || undefined,
-          imageUrl: o.imageUrl?.trim() || undefined, // dataURL if chosen via file
-        })),
-        answer: q.answer
-      }))
+      TID,
+      ID,
+      questions: questions.map((q) => ({
+        text: q.text,
+        options: q.options,
+        correctIndex: q.correctIndex,
+      })),
     };
+    // ================================================
 
+    setSaving(true);
     try {
-      setSubmitting(true);
-      setMessage("");
-      const res = await authFetch("https://knighthoot.app/api/test", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
+      const res = await fetch('/api/test', {
+        method: 'POST',
+        headers: getAuthHeaders(), // <-- include token
+        body: JSON.stringify(payload),
       });
-      const data = await res.json();
+
       if (!res.ok) {
-        setMessage(data?.error || "Failed to create quiz.");
-        return;
+        const txt = await res.text();
+        throw new Error(txt || `Request failed with ${res.status}`);
       }
-      setMessage(data?.message || "Quiz created successfully.");
-    } catch {
-      setMessage("Network error creating quiz.");
+
+      const data = await res.json(); // expected: { test, message }
+      const pin = String(data?.test?.PIN || data?.pin || data?.PIN || '');
+      setSuccessPin(pin || '✓ Saved');
+
+      navigate('/dashboard/teacher/quizzes');
+    } catch (err: any) {
+      setError(err?.message || 'Network error');
     } finally {
-      setSubmitting(false);
+      setSaving(false);
     }
-  }
+  };
 
   return (
-    <div className="cq__wrap">
-        <h1 className="cq__title">Create New Quiz</h1>
-        <p className="cq__subtitle">Design your quiz with multiple choice questions</p>
-
-        {/* Quiz title card */}
-        <div className="cq__card">
-        <label className="cq__label">Quiz Title</label>
-        <input
-            className="cq__input"
-            placeholder="Enter quiz title..."
-            value={testId}
-            onChange={(e) => setTestId(e.target.value)}
-        />
+    <div className="min-h-screen w-full bg-neutral-100 flex justify-center">
+      <div className="w-full max-w-3xl p-6">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-semibold">Create a Quiz</h1>
+          <button
+            className="px-3 py-2 rounded-xl bg-gray-200 hover:bg-gray-300 text-sm"
+            onClick={() => navigate(-1)}
+            type="button"
+          >
+            ← Back
+          </button>
         </div>
 
-        {/* Questions */}
-        {questions.map((q, qIdx) => (
-        <div key={qIdx} className="cq__card">
-            <div className="cq__cardHead">
-            <h3>Question {qIdx + 1}</h3>
-            <button
-                type="button"
-                className="cq__trash"
-                title="Remove question"
-                onClick={() => removeQuestion(qIdx)}
-            >
-                🗑
-            </button>
-            </div>
-
-            {/* Question text / image */}
-            <label className="cq__label">Question Text</label>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Title */}
+          <div>
+            <label className="block text-sm font-medium mb-1">Title</label>
             <input
-            className="cq__input"
-            placeholder="Enter your question..."
-            value={q.question ?? ""}
-            onChange={(e) => setQuestionField(qIdx, "question", e.target.value)}
+              className="w-full rounded-xl border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+              placeholder="e.g., UCF History Quiz"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
             />
+          </div>
 
-            <label className="cq__label">Question Image (Optional)</label>
-            <input
-              className="cq__input"
-              placeholder="Paste image URL here..."
-              value={q.imageUrl ?? ""}
-              onChange={(e) => setQuestionField(qIdx, "imageUrl", e.target.value)}
-            />
-
-            <div className="cq__orRow">
-              <span className="cq__orLine" />
-              <span className="cq__orText">or</span>
-              <span className="cq__orLine" />
-            </div>
-
-            <label className="cq__fileBtn">
-              <img src={picture} alt="" />
-              <span>Choose from files</span>
-              <input
-                  type="file"
-                  accept="image/*"
-                  hidden
-                  onChange={(e) => setQuestionImageFromFile(qIdx, e.target.files?.[0] || null)}
-              />
-            </label>
-
-            {/* Options count */}
-            <div className="cq__label block">Number of Answer Options</div>
-            <div className="cq__row">
-              <button
-                type="button"
-                className={`cq__pill ${q.options.length === 2 ? "is-active" : ""}`}
-                onClick={() => toggleOptionCount(qIdx, 2)}
+          {/* Questions */}
+          <div className="space-y-5">
+            {questions.map((q, i) => (
+              <div
+                key={i}
+                className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm"
               >
-                2 Options
-              </button>
-              <button
-                type="button"
-                className={`cq__pill ${q.options.length === 4 ? "is-active" : ""}`}
-                onClick={() => toggleOptionCount(qIdx, 4)}
-              >
-                4 Options
-              </button>
-            </div>
-
-
-            {/* Options list */}
-            <div className="cq__label block">Answer Options</div>
-            <div className="cq__options">
-            {q.options.map((o, oIdx) => (
-                <div className="cq__optionRow">
-                  <input
-                    type="radio"
-                    name={`ans-${qIdx}`}
-                    checked={q.answer === oIdx}
-                    onChange={() => setAnswer(qIdx, oIdx)}
-                  />
-                  <input
-                    className="cq__input opt"
-                    placeholder={`Option ${oIdx + 1} text…`}
-                    value={o.text ?? ""}
-                    onChange={(e) => setOptionField(qIdx, oIdx, "text", e.target.value)}
-                  />
-                  <input
-                    className="cq__input opt"
-                    placeholder="Image URL (optional)…"
-                    value={o.imageUrl ?? ""}
-                    onChange={(e) => setOptionField(qIdx, oIdx, "imageUrl", e.target.value)}
-                  />
-                  <label className="cq__fileBtn cq__fileBtn--small">
-                    <img src={picture} alt="" />
-                    <input
-                      type="file"
-                      accept="image/*"
-                      hidden
-                      onChange={(e) => setOptionImageFromFile(qIdx, oIdx, e.target.files?.[0] || null)}
-                    />
-                  </label>
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="font-medium">Question {i + 1}</h2>
+                  <div className="flex items-center gap-2">
+                    <label className="text-sm">Answer:</label>
+                    <select
+                      className="rounded-lg border border-gray-300 px-2 py-1"
+                      value={q.correctIndex}
+                      onChange={(e) =>
+                        updateQuestion(i, { correctIndex: Number(e.target.value) })
+                      }
+                    >
+                      <option value={0}>A</option>
+                      <option value={1}>B</option>
+                      <option value={2}>C</option>
+                      <option value={3}>D</option>
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => removeQuestion(i)}
+                      className="text-sm text-red-600 hover:underline"
+                    >
+                      Remove
+                    </button>
+                  </div>
                 </div>
 
-              ))}
-            </div>
+                <input
+                  className="w-full rounded-xl border border-gray-300 px-3 py-2 mb-3 focus:outline-none focus:ring-2 focus:ring-black"
+                  placeholder="Enter the question text"
+                  value={q.text}
+                  onChange={(e) => updateQuestion(i, { text: e.target.value })}
+                />
 
-            <p className="cq__hint">
-            Click the radio next to the correct answer • Provide <b>text OR image</b> for each field
-            </p>
-        </div>
-        ))}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {q.options.map((opt, j) => (
+                    <input
+                      key={j}
+                      className={`w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-2 ${
+                        q.correctIndex === j
+                          ? 'border-emerald-500 ring-emerald-300'
+                          : 'border-gray-300 focus:ring-black'
+                      }`}
+                      placeholder={`Option ${String.fromCharCode(65 + j)}`}
+                      value={opt}
+                      onChange={(e) => updateOption(i, j, e.target.value)}
+                    />
+                  ))}
+                </div>
+              </div>
+            ))}
 
-        {/* Add question */}
-        <div className="cq__footerRow">
-        <button type="button" className="cq__addBtn" onClick={addQuestion}>
-            + Add Question
-        </button>
-        </div>
+            <button
+              type="button"
+              onClick={addQuestion}
+              className="w-full rounded-2xl border-2 border-dashed border-gray-300 py-3 hover:bg-gray-50"
+            >
+              + Add Question
+            </button>
+          </div>
 
-        {/* Message */}
-        {message && <div className="cq__msg">{message}</div>}
-
-        {/* Actions */}
-        <div className="cq__actions">
-        <button type="button" className="cq__btnGhost" disabled={submitting}>
-            Cancel
-        </button>
-        <button
-            type="button"
-            className="cq__btnPrimary"
-            disabled={submitting}
-            onClick={saveQuiz}
-        >
-            {submitting ? "Saving…" : "Save Quiz"}
-        </button>
-        </div>
+          {/* Form footer */}
+          <div className="flex items-center gap-3">
+            <button
+              disabled={saving}
+              className="rounded-xl bg-black text-white px-4 py-2 hover:opacity-90 disabled:opacity-60"
+              type="submit"
+            >
+              {saving ? 'Saving…' : 'Save Quiz'}
+            </button>
+            {error && <span className="text-red-600 text-sm">{error}</span>}
+            {successPin && (
+              <span className="text-emerald-700 text-sm">
+                Saved!{' '}
+                {successPin !== '✓ Saved' ? `PIN: ${successPin}` : successPin}
+              </span>
+            )}
+          </div>
+        </form>
+      </div>
     </div>
-    );
+  );
 }

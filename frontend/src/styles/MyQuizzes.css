@@ -1,22 +1,32 @@
 /* === MyQuizzes Page Styles === */
 
 /* Layout wrapper */
+/* This is the container for the entire page content */
 .qz-wrap {
-  padding: 24px;
+  /* Padding is now handled by the .tl__content container */
   color: #e6e6e6;
+  padding-bottom: 32px; /* Ensure space at the bottom */
 }
 
 /* Page title + Create button */
 .qz-head {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
+  align-items: flex-start; /* Aligns title/subtitle block with button */
+  margin-bottom: 20px; /* Increased margin for spacing */
 }
 
 .qz-head h1 {
-  font-size: 24px;
+  font-size: 32px;
   font-weight: 700;
+  color: #e9e9ec;
+  margin-bottom: 8px;
+}
+.qz-subtitle {
+  font-size: 16px;
+  color: #a0a0a0;
+  margin-top: 0;
+  margin-bottom: 24px;
 }
 
 /* Buttons */
@@ -26,14 +36,21 @@
   padding: 10px 14px;
   font-weight: 600;
   cursor: pointer;
+  white-space: nowrap; /* Prevents button text wrapping */
+  background: #ffcc00 !important;
+  color: #111 !important;
 }
 
 .btn-sm {
-  padding: 8px 12px;
+  padding: 8px 24px; /* Used for the Edit button on the cards */
+  background: #ffcc00 !important;
+  color: #111 !important;
+  font-size: 14px;
+  min-width: 80px;
 }
 
-.btn-gold {
-  background: #ffcc00;
+.btn-gold:focus {
+  background: #ffcc00 !important;
   color: #111;
   transition: filter 0.2s ease;
 }
@@ -50,6 +67,7 @@
   border-radius: 8px;
   cursor: pointer;
   transition: background 0.2s ease;
+  flex-shrink: 0;
 }
 
 .icon-btn:hover {
@@ -63,24 +81,39 @@
 /* Toolbar (search, sort, view) */
 .qz-toolbar {
   display: flex;
+  flex-direction: column; 
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.qz-toolbar__top-row {
+  display: flex;
   gap: 12px;
   align-items: center;
-  margin-bottom: 18px;
 }
 
+.qz-search {
+  flex-grow: 1; /* Allows search bar to take up most of the space */
+}
 .qz-search input {
-  width: 420px;
-  max-width: 55vw;
+  width: 100%; /* Fill the container */
   background: #222;
   border: 1px solid #333;
   color: #ddd;
   border-radius: 10px;
   padding: 10px 12px;
+  box-sizing: border-box; /* Crucial for full width */
 }
 
+.qz-sort {
+  /* Ensures sort elements stay together */
+  display: flex; 
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
 .qz-sort label {
-  margin-right: 6px;
   color: #9a9a9a;
+  align-self: center;
 }
 
 .qz-sort select {
@@ -92,11 +125,12 @@
 }
 
 .qz-view {
-  margin-left: auto;
+  margin-left: auto; /* Pushes view controls to the far right */
   display: flex;
   align-items: center;
   gap: 8px;
   color: #9a9a9a;
+  flex-shrink: 0;
 }
 
 /* Empty state */
@@ -106,6 +140,7 @@
   border-radius: 12px;
   padding: 48px 24px;
   text-align: center;
+  margin-top: 24px;
 }
 
 .qz-empty__icon {
@@ -131,10 +166,58 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  cursor: pointer;
 }
 
 .qz-card__title {
   font-weight: 700;
+}
+
+/* Style for the relocated Create button */
+.qz-create-btn:focus {
+  /* Uses .btn .btn-gold styling */
+  background: #ffcc00 !important; 
+  flex-shrink: 0;
+}
+
+/* BOTTOM ROW: Sort + View Controls */
+.qz-toolbar__bottom-row {
+  display: flex;
+  justify-content: space-between; /* Pushes Sort to left, View to right */
+  align-items: center;
+}
+
+/* View Controls Box Styling */
+.qz-view__box {
+  display: flex;
+  /* Styling to make it look like a cohesive box */
+  background: #2b2b2b; 
+  border: 1px solid #3a3a3a;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Refine Icon Buttons inside the box */
+.qz-view__box .icon-btn {
+  /* Remove individual background/border and rely on parent box */
+  background: transparent; 
+  border-radius: 0;
+  border-right: 1px solid #3a3a3a; /* Divider between icons */
+}
+
+/* Fix last icon in the box */
+.qz-view__box .icon-btn:last-child {
+  border-right: none;
+}
+
+/* Ensure active state looks correct inside the box */
+.qz-view__box .icon-btn.is-active {
+  background: #ffcc00; /* Yellow background */
+  color: #111; /* Dark icon/text */
+  outline: none; /* Remove outline, rely on background change */
+}
+.qz-view__box .icon-btn.is-active:hover {
+  background: #e6b800; /* Darker yellow hover */
 }
 
 .qz-card__meta {
@@ -171,11 +254,18 @@
   border: 1px solid #2a2a2a;
   border-radius: 12px;
   padding: 14px 16px;
+  cursor: pointer;
+}
+
+.qz-row__main {
+  /* Container for title/meta to keep them stacked */
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .qz-row__title {
   font-weight: 700;
-  margin-bottom: 4px;
 }
 
 .qz-row__meta {
@@ -189,6 +279,7 @@
   display: flex;
   gap: 8px;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .qz-card:hover,
@@ -196,7 +287,13 @@
   background-color: rgba(255, 255, 255, 0.05);
   transition: background-color 0.2s ease;
 }
-.qz-card,
-.qz-row {
-  cursor: pointer;
+
+/* === Responsive Tweaks === */
+@media (max-width: 768px) {
+  .qz-toolbar {
+    flex-wrap: wrap; /* Allows toolbar items to stack on small screens */
+  }
+  .qz-search {
+    width: 100%; /* Search bar takes full width */
+  }
 }

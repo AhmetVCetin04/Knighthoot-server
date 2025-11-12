@@ -1,94 +1,54 @@
 {
   "_": {
     "postman_variable_scope": "environment",
-    "postman_exported_at": "2025-11-05T22:54:13.960Z",
+    "postman_exported_at": "2025-11-12T22:55:23.846Z",
     "postman_exported_using": "Newman/6.2.1"
   },
-  "id": "test-env",
-  "name": "Local Test Environment",
+  "id": "fbdd9936-caa9-428d-a35b-2fd07eb0b3c1",
+  "name": "environment",
   "values": [
     {
       "type": "any",
-      "value": "http://localhost:5173",
-      "key": "BASE_URL"
+      "value": "https://knighthoot.app",
+      "key": "base_url"
     },
     {
       "type": "any",
-      "value": "",
-      "key": "TOKEN"
+      "value": "test> switched to db Knighthoot\nKnighthoot> \nKnighthoot> 437930\n\nKnighthoot> ",
+      "key": "otp"
     },
     {
       "type": "any",
-      "value": "690bd589743919d8ab646611",
-      "key": "sUserId"
-    },
-    {
-      "type": "any",
-      "value": "jonsnow456",
-      "key": "sUsername"
-    },
-    {
-      "type": "any",
-      "value": "jonsnow@example.com",
-      "key": "sEmail"
-    },
-    {
-      "type": "any",
-      "value": 1,
-      "key": "sNumID"
-    },
-    {
-      "type": "any",
-      "value": "690bd58db6047e0cf2f69558",
-      "key": "tUserId"
-    },
-    {
-      "type": "any",
-      "value": "gandalf001",
-      "key": "tUsername"
-    },
-    {
-      "type": "any",
-      "value": "gandalf@example.com",
-      "key": "tEmail"
-    },
-    {
-      "type": "any",
-      "value": 1,
-      "key": "tNumID"
-    },
-    {
-      "type": "any",
-      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InN0dWRlbnQiLCJpYXQiOjE3NjIzODMyNDksImV4cCI6MTc2MjQwNDg0OX0.PtxtIEFzZEkH0qpsQVzrgUiAUbtJnM6hN2pOOIEDJRc",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTYsInJvbGUiOiJzdHVkZW50IiwiaWF0IjoxNzYyOTg4MTIzLCJleHAiOjE3NjMwMDk3MjN9.LRQE4ppmeKbl3Wkt0UOiqN-i8oR9zzhtKpYPBUJ2LWQ",
       "key": "login_student_token"
     },
     {
       "type": "any",
-      "value": "690bd589743919d8ab646611",
+      "value": "6913d86f8239ad9b9da93631",
       "key": "login_student_dbId"
     },
     {
       "type": "any",
-      "value": 1,
+      "value": 16,
       "key": "login_student_ID"
     },
     {
       "type": "any",
-      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InRlYWNoZXIiLCJpYXQiOjE3NjIzODMyNTIsImV4cCI6MTc2MjQwNDg1Mn0.mBWOJtUIXAMGwG0RnYtIo6jfPW4s2mG-hxAIwA2jXFY",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OSwicm9sZSI6InRlYWNoZXIiLCJpYXQiOjE3NjI5ODgxMjYsImV4cCI6MTc2MzAwOTcyNn0.Puks0I8F0Htr7FcK43Nt3HuJVqEWBzB8l0jvgU3yd4s",
       "key": "login_teacher_token"
     },
     {
       "type": "any",
-      "value": "690bd58db6047e0cf2f69558",
+      "value": "6913da35b2e17adcc82fa282",
       "key": "login_teacher_dbId"
     },
     {
       "type": "any",
-      "value": 1,
+      "value": 9,
       "key": "login_teacher_ID"
     }
   ],
   "_postman_variable_scope": "environment",
-  "_postman_exported_at": "2025-11-05T22:54:15.878Z",
+  "_postman_exported_at": "2025-11-12T22:55:26.473Z",
   "_postman_exported_using": "Newman/6.2.1"
 }

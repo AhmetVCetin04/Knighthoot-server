@@ -5,10 +5,10 @@ import house from "../assets/house.png";
 import plus from "../assets/plus.png";
 import book from "../assets/book.png";
 import play from "../assets/play.png";
-import students from "../assets/students.png";
 import reports from "../assets/reports.png";
 import settings from "../assets/settings.png";
 import logoutbut from "../assets/logoutbut.png";
+import SiteBackground from '../components/SiteBackground';
 import "../styles/TeacherLayout.css";
 
 export default function TeacherLayout() {
@@ -37,27 +37,23 @@ export default function TeacherLayout() {
 
   return (
     <main className="site-bg">
+      <SiteBackground />
       {/* HEADER + SIDEBAR only on inner pages */}
       {!onDashboard && (
         <>
           <header className="tl__topbar">
             <div className="tl__left">
-              <button
-                className="tl__burger"
-                aria-label="Toggle menu"
-                onClick={() => setOpen(v => !v)}
-              >☰</button>
               <span className="tl__brand">Knighthoot</span>
               <span className="tl__divider">|</span>
               <span className="tl__context">{pageTitle}</span>
             </div>
-            <div className="tl__right">
-              <img src={ucf} alt="UCF" className="tl__seal" />
-              <button className="tl__logoutTop" onClick={logout}>Logout</button>
-            </div>
           </header>
 
           <aside className={`tl__sidebar ${open ? "is-open" : ""}`} aria-label="Teacher navigation">
+            
+            <div className="tl__sideHeader">
+              <img src={ucf} alt="UCF" className="tl__sideSeal" />
+            </div>
             <nav className="tl__menu" onClick={() => setOpen(false)}>
               <NavLink end to="/dashboard/teacher" className="tl__item">
                 <img src={house} alt="" className="tl__icon" />
@@ -74,10 +70,6 @@ export default function TeacherLayout() {
               <NavLink to="/dashboard/teacher/start" className="tl__item">
                 <img src={play} alt="" className="tl__icon" />
                 <span>Start Test</span>
-              </NavLink>
-              <NavLink to="/dashboard/teacher/students" className="tl__item">
-                <img src={students} alt="" className="tl__icon" />
-                <span>My Classes</span>
               </NavLink>
               <NavLink to="/dashboard/teacher/reports" className="tl__item">
                 <img src={reports} alt="" className="tl__icon" />

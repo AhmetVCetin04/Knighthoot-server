@@ -87,7 +87,7 @@
   "variable": [
     {
       "key": "baseUrl",
-      "value": "http://localhost:5173"
+      "value": "https://knighthoot.app"
     }
   ]
 }

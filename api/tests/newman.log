@@ -3,37 +3,35 @@ newman
 Register Student API Test
 
 → Register - Student
-  POST http://localhost:5173/api/register [201 Created, 455B, 261ms]
-  ✓  Status code is 201
-  ✓  User object exists
-  ✓  Has required user fields
-  ✓  Contains success message
+  POST https://knighthoot.app/api/register [400 Bad Request, 351B, 2.1s]
+  ✓  Status is 400 for existing user
+  ✓  Has error message
 
-┌─────────────────────────┬────────────────────┬───────────────────┐
-│                         │           executed │            failed │
-├─────────────────────────┼────────────────────┼───────────────────┤
-│              iterations │                  1 │                 0 │
-├─────────────────────────┼────────────────────┼───────────────────┤
-│                requests │                  1 │                 0 │
-├─────────────────────────┼────────────────────┼───────────────────┤
-│            test-scripts │                  1 │                 0 │
-├─────────────────────────┼────────────────────┼───────────────────┤
-│      prerequest-scripts │                  0 │                 0 │
-├─────────────────────────┼────────────────────┼───────────────────┤
-│              assertions │                  4 │                 0 │
-├─────────────────────────┴────────────────────┴───────────────────┤
-│ total run duration: 348ms                                        │
-├──────────────────────────────────────────────────────────────────┤
-│ total data received: 182B (approx)                               │
-├──────────────────────────────────────────────────────────────────┤
-│ average response time: 261ms [min: 261ms, max: 261ms, s.d.: 0µs] │
-└──────────────────────────────────────────────────────────────────┘
+┌─────────────────────────┬──────────────────┬──────────────────┐
+│                         │         executed │           failed │
+├─────────────────────────┼──────────────────┼──────────────────┤
+│              iterations │                1 │                0 │
+├─────────────────────────┼──────────────────┼──────────────────┤
+│                requests │                1 │                0 │
+├─────────────────────────┼──────────────────┼──────────────────┤
+│            test-scripts │                1 │                0 │
+├─────────────────────────┼──────────────────┼──────────────────┤
+│      prerequest-scripts │                0 │                0 │
+├─────────────────────────┼──────────────────┼──────────────────┤
+│              assertions │                2 │                0 │
+├─────────────────────────┴──────────────────┴──────────────────┤
+│ total run duration: 13.1s                                     │
+├───────────────────────────────────────────────────────────────┤
+│ total data received: 53B (approx)                             │
+├───────────────────────────────────────────────────────────────┤
+│ average response time: 2.1s [min: 2.1s, max: 2.1s, s.d.: 0µs] │
+└───────────────────────────────────────────────────────────────┘
 newman
 
 Register Student API Test
 
 → Register - Student
-  POST http://localhost:5173/api/register [400 Bad Request, 329B, 101ms]
+  POST https://knighthoot.app/api/register [400 Bad Request, 351B, 286ms]
   ✓  Status is 400 for existing user
   ✓  Has error message
 
@@ -50,22 +48,20 @@ Register Student API Test
 ├─────────────────────────┼────────────────────┼───────────────────┤
 │              assertions │                  2 │                 0 │
 ├─────────────────────────┴────────────────────┴───────────────────┤
-│ total run duration: 174ms                                        │
+│ total run duration: 415ms                                        │
 ├──────────────────────────────────────────────────────────────────┤
 │ total data received: 53B (approx)                                │
 ├──────────────────────────────────────────────────────────────────┤
-│ average response time: 101ms [min: 101ms, max: 101ms, s.d.: 0µs] │
+│ average response time: 286ms [min: 286ms, max: 286ms, s.d.: 0µs] │
 └──────────────────────────────────────────────────────────────────┘
 newman
 
 Register Teacher API Test
 
 → Register - Teacher
-  POST http://localhost:5173/api/register [201 Created, 463B, 290ms]
-  ✓  Status code is 201
-  ✓  User object exists
-  ✓  Has required teacher fields
-  ✓  Contains success message
+  POST https://knighthoot.app/api/register [400 Bad Request, 351B, 266ms]
+  ✓  Status is 400 for existing teacher
+  ✓  Has error message
 
 ┌─────────────────────────┬────────────────────┬───────────────────┐
 │                         │           executed │            failed │
@@ -78,48 +74,48 @@ Register Teacher API Test
 ├─────────────────────────┼────────────────────┼───────────────────┤
 │      prerequest-scripts │                  0 │                 0 │
 ├─────────────────────────┼────────────────────┼───────────────────┤
-│              assertions │                  4 │                 0 │
+│              assertions │                  2 │                 0 │
 ├─────────────────────────┴────────────────────┴───────────────────┤
-│ total run duration: 387ms                                        │
+│ total run duration: 382ms                                        │
 ├──────────────────────────────────────────────────────────────────┤
-│ total data received: 190B (approx)                               │
+│ total data received: 53B (approx)                                │
 ├──────────────────────────────────────────────────────────────────┤
-│ average response time: 290ms [min: 290ms, max: 290ms, s.d.: 0µs] │
+│ average response time: 266ms [min: 266ms, max: 266ms, s.d.: 0µs] │
 └──────────────────────────────────────────────────────────────────┘
 newman
 
 Register Teacher API Test
 
 → Register - Teacher
-  POST http://localhost:5173/api/register [400 Bad Request, 329B, 81ms]
+  POST https://knighthoot.app/api/register [400 Bad Request, 351B, 205ms]
   ✓  Status is 400 for existing teacher
   ✓  Has error message
 
-┌─────────────────────────┬──────────────────┬──────────────────┐
-│                         │         executed │           failed │
-├─────────────────────────┼──────────────────┼──────────────────┤
-│              iterations │                1 │                0 │
-├─────────────────────────┼──────────────────┼──────────────────┤
-│                requests │                1 │                0 │
-├─────────────────────────┼──────────────────┼──────────────────┤
-│            test-scripts │                1 │                0 │
-├─────────────────────────┼──────────────────┼──────────────────┤
-│      prerequest-scripts │                0 │                0 │
-├─────────────────────────┼──────────────────┼──────────────────┤
-│              assertions │                2 │                0 │
-├─────────────────────────┴──────────────────┴──────────────────┤
-│ total run duration: 180ms                                     │
-├───────────────────────────────────────────────────────────────┤
-│ total data received: 53B (approx)                             │
-├───────────────────────────────────────────────────────────────┤
-│ average response time: 81ms [min: 81ms, max: 81ms, s.d.: 0µs] │
-└───────────────────────────────────────────────────────────────┘
+┌─────────────────────────┬────────────────────┬───────────────────┐
+│                         │           executed │            failed │
+├─────────────────────────┼────────────────────┼───────────────────┤
+│              iterations │                  1 │                 0 │
+├─────────────────────────┼────────────────────┼───────────────────┤
+│                requests │                  1 │                 0 │
+├─────────────────────────┼────────────────────┼───────────────────┤
+│            test-scripts │                  1 │                 0 │
+├─────────────────────────┼────────────────────┼───────────────────┤
+│      prerequest-scripts │                  0 │                 0 │
+├─────────────────────────┼────────────────────┼───────────────────┤
+│              assertions │                  2 │                 0 │
+├─────────────────────────┴────────────────────┴───────────────────┤
+│ total run duration: 285ms                                        │
+├──────────────────────────────────────────────────────────────────┤
+│ total data received: 53B (approx)                                │
+├──────────────────────────────────────────────────────────────────┤
+│ average response time: 205ms [min: 205ms, max: 205ms, s.d.: 0µs] │
+└──────────────────────────────────────────────────────────────────┘
 newman
 
 Login Student API Test
 
 → Login - Student
-  POST http://localhost:5173/api/login [200 OK, 599B, 276ms]
+  POST https://knighthoot.app/api/login [200 OK, 675B, 315ms]
   ✓  Login OK
   ✓  Has token
   ✓  Correct role
@@ -137,18 +133,18 @@ Login Student API Test
 ├─────────────────────────┼────────────────────┼───────────────────┤
 │              assertions │                  3 │                 0 │
 ├─────────────────────────┴────────────────────┴───────────────────┤
-│ total run duration: 354ms                                        │
+│ total run duration: 391ms                                        │
 ├──────────────────────────────────────────────────────────────────┤
-│ total data received: 330B (approx)                               │
+│ total data received: 332B (approx)                               │
 ├──────────────────────────────────────────────────────────────────┤
-│ average response time: 276ms [min: 276ms, max: 276ms, s.d.: 0µs] │
+│ average response time: 315ms [min: 315ms, max: 315ms, s.d.: 0µs] │
 └──────────────────────────────────────────────────────────────────┘
 newman
 
 Login Teacher API Test
 
 → Login - Teacher
-  POST http://localhost:5173/api/login [200 OK, 607B, 240ms]
+  POST https://knighthoot.app/api/login [200 OK, 681B, 264ms]
   ✓  Login OK
   ✓  Has token
   ✓  Correct role
@@ -166,73 +162,9 @@ Login Teacher API Test
 ├─────────────────────────┼────────────────────┼───────────────────┤
 │              assertions │                  3 │                 0 │
 ├─────────────────────────┴────────────────────┴───────────────────┤
-│ total run duration: 313ms                                        │
+│ total run duration: 337ms                                        │
 ├──────────────────────────────────────────────────────────────────┤
 │ total data received: 338B (approx)                               │
 ├──────────────────────────────────────────────────────────────────┤
-│ average response time: 240ms [min: 240ms, max: 240ms, s.d.: 0µs] │
+│ average response time: 264ms [min: 264ms, max: 264ms, s.d.: 0µs] │
 └──────────────────────────────────────────────────────────────────┘
-newman
-
-Delete Student API Test
-
-→ Delete Student - valid token
-  DELETE http://localhost:5173/api/account/delete [200 OK, 317B, 62ms]
-  ✓  Delete success (200)
-
-→ Delete Student - second call should 404
-  DELETE http://localhost:5173/api/account/delete [404 Not Found, 322B, 20ms]
-  ✓  Second delete returns 404
-
-┌─────────────────────────┬───────────────────┬──────────────────┐
-│                         │          executed │           failed │
-├─────────────────────────┼───────────────────┼──────────────────┤
-│              iterations │                 1 │                0 │
-├─────────────────────────┼───────────────────┼──────────────────┤
-│                requests │                 2 │                0 │
-├─────────────────────────┼───────────────────┼──────────────────┤
-│            test-scripts │                 2 │                0 │
-├─────────────────────────┼───────────────────┼──────────────────┤
-│      prerequest-scripts │                 0 │                0 │
-├─────────────────────────┼───────────────────┼──────────────────┤
-│              assertions │                 2 │                0 │
-├─────────────────────────┴───────────────────┴──────────────────┤
-│ total run duration: 176ms                                      │
-├────────────────────────────────────────────────────────────────┤
-│ total data received: 98B (approx)                              │
-├────────────────────────────────────────────────────────────────┤
-│ average response time: 41ms [min: 20ms, max: 62ms, s.d.: 21ms] │
-└────────────────────────────────────────────────────────────────┘
-newman
-
-Delete Teacher API Test
-
-→ Delete Teacher - valid token
-  DELETE http://localhost:5173/api/account/delete [200 OK, 317B, 54ms]
-  ✓  Delete success (200)
-  ✓  Response has success message
-
-→ Delete Teacher - second call should 404
-  DELETE http://localhost:5173/api/account/delete [404 Not Found, 322B, 17ms]
-  ✓  Second delete returns 404
-  ✓  Response has error field
-
-┌─────────────────────────┬───────────────────┬──────────────────┐
-│                         │          executed │           failed │
-├─────────────────────────┼───────────────────┼──────────────────┤
-│              iterations │                 1 │                0 │
-├─────────────────────────┼───────────────────┼──────────────────┤
-│                requests │                 2 │                0 │
-├─────────────────────────┼───────────────────┼──────────────────┤
-│            test-scripts │                 2 │                0 │
-├─────────────────────────┼───────────────────┼──────────────────┤
-│      prerequest-scripts │                 0 │                0 │
-├─────────────────────────┼───────────────────┼──────────────────┤
-│              assertions │                 4 │                0 │
-├─────────────────────────┴───────────────────┴──────────────────┤
-│ total run duration: 181ms                                      │
-├────────────────────────────────────────────────────────────────┤
-│ total data received: 98B (approx)                              │
-├────────────────────────────────────────────────────────────────┤
-│ average response time: 35ms [min: 17ms, max: 54ms, s.d.: 18ms] │
-└────────────────────────────────────────────────────────────────┘

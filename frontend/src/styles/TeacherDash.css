@@ -1,8 +1,12 @@
+/* =======================
+   Teacher Dashboard Styles
+   ======================= */
+
 /* Fill the Viewport */
 html, body, #root { height: 100%; }
 body { margin: 0; }
 
-/* Site Background  */
+/* Site Background */
 .site-bg {
   min-height: 100vh;
   width: 100%;
@@ -24,35 +28,41 @@ body { margin: 0; }
   z-index: 10;
   color: #e7e7e7;
 }
+
 .teachertopbar__left {
   display: flex;
   align-items: center;
   gap: 12px;
   font-weight: 700;
 }
+
 .teachertopbar__brand {
   font-family: "Oswald", "Montserrat", sans-serif;
   font-size: 26px;
   color: #d5ac16;
 }
-.teachertopbar__divider {
-  color: #8a8a8a;
-}
+
+.teachertopbar__divider { color: #8a8a8a; }
+
 .teachertopbar__context {
   color: #d0d0d0;
   font-weight: 600;
 }
+
 .teachertopbar__right {
   display: flex;
   align-items: center;
   gap: 12px;
 }
+
 .teachertopbar__logo {
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   object-fit: contain;
 }
+
+/* Legacy top-right button (kept if needed elsewhere) */
 .teachertopbar__logout {
   padding: 8px 12px;
   background: #2a2a31;
@@ -62,9 +72,7 @@ body { margin: 0; }
   font-weight: 600;
   cursor: pointer;
 }
-.teachertopbar__logout:hover {
-  background: #34343b;
-}
+.teachertopbar__logout:hover { background: #34343b; }
 
 /* ===== Stage ===== */
 .teacher__stage {
@@ -75,60 +83,73 @@ body { margin: 0; }
 
 /* Welcome text */
 .teacher__welcome h1 {
-  font-size: 32px;
+  font-family: "Oswald", "Montserrat", "Arial Black", sans-serif;
+  font-size: 36px;
   margin-bottom: 4px;
   color: #fff;
 }
 .teacher__welcome p {
-  margin-top: 0;
-  color: #ccc;
+  font-family: "Oswald", "Montserrat", "Arial Black", sans-serif;
+  margin-top: 6px;
+  color: #c8c8c8;
 }
 
-/* ===== Grid ===== */
+/* ===== Grid (2 × 2 big tiles) ===== */
 .teacher__grid {
-  max-width: 1100px;
+  max-width: 1280px;
   margin: 40px auto;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 20px;
-  padding: 0 20px;
+  grid-template-columns: repeat(2, minmax(420px, 1fr)); /* two big tiles */
+  gap: 18px;
+  padding: 0 24px;
 }
-@media (max-width: 900px) {
-  .teacher__grid { grid-template-columns: repeat(2, 1fr); }
-}
-@media (max-width: 600px) {
-  .teacher__grid { grid-template-columns: 1fr; }
+
+@media (max-width: 980px) {
+  .teacher__grid {
+    grid-template-columns: 1fr; /* stack on tablet/phone */
+  }
 }
 
 /* ===== Tiles ===== */
 .teacher__tile {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 18px;
-  border-radius: 12px;
+  gap: 14px;
+  border-radius: 10px;
   border: 1px solid rgba(255,255,255,.08);
-  padding: 22px;
-  text-align: left;
+  padding: 22px 26px;
+  min-height: 140px;                 /* big tile look */
+  text-align: center;
   cursor: pointer;
-  transition: transform .15s ease, box-shadow .15s ease;
+  box-shadow: 0 14px 28px rgba(0,0,0,.35);
+  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
 }
+
 .teacher__tile:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0,0,0,.35);
+  box-shadow: 0 18px 34px rgba(0,0,0,.45);
 }
+
 .teacher__tile img {
-  width: 42px;
-  height: 42px;
+  width: 48px;
+  height: 48px;
   object-fit: contain;
+  flex: 0 0 auto;    
 }
+
 .teacher__tile h3 {
+  font-family: "Oswald", "Montserrat", "Arial Black", sans-serif;
   margin: 0;
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 22px;
+  font-weight: 800;
 }
+
 .teacher__tile p {
-  margin: 4px 0 0;
-  font-size: 14px;
+  font-family: "Oswald", "Montserrat", "Arial Black", sans-serif;
+  margin: 6px 0 0;
+  font-size: 15px;
+  opacity: .9;
 }
 
 /* Color variants */
@@ -151,4 +172,68 @@ body { margin: 0; }
 .bronze {
   background: linear-gradient(#c4ad8e, #b39a7a);
   color: #141414;
+}
+
+/* ===== Account Dropdown (top-right) ===== */
+.userMenu { position: relative; }
+.userMenu__btn {
+  background:#2c2c2c;
+  color:#e7e7e7;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:8px;
+  padding:8px 12px;
+  cursor:pointer;
+}
+.userMenu__list {
+  position:absolute;
+  right:0; top:110%;
+  background:#1f1f1f;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:10px;
+  min-width:200px;
+  padding:6px;
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  z-index:20;
+  box-shadow: 0 12px 28px rgba(0,0,0,.45);
+}
+.userMenu__list > button {
+  background:transparent;
+  color:#e7e7e7;
+  text-align:left;
+  padding:10px 12px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.userMenu__list > button:hover { background:rgba(255,255,255,.08); }
+
+
+/* ===== Color variants (match screenshot) ===== */
+
+/* ===== FORCE TILE COLORS (place at end of file) ===== */
+.teacher__tile.gold {
+  background: linear-gradient(180deg, #F0C419 0%, #c4961a 100%) !important;
+  color: #111 !important;
+  border-color: rgba(0,0,0,.12) !important;
+}
+.teacher__tile.gold-dark {
+  background: linear-gradient(180deg, #E2E3E8 0%, #d6d6d6 100%) !important;
+  color: #111 !important;
+  border-color: rgba(0,0,0,.14) !important;
+}
+.teacher__tile.silver {
+  background: linear-gradient(180deg, #D9A70E 0%, #B8860B 100%) !important;
+  color: #141414 !important;
+  border-color: rgba(0,0,0,.10) !important;
+}
+.teacher__tile.silver-dark {
+  background: linear-gradient(180deg, #C2C7D0 0%, #8b94a0 100%) !important;
+  color: #141414 !important;
+  border-color: rgba(0,0,0,.12) !important;
 }

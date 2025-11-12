@@ -6,6 +6,9 @@ import TimeLimitModal from "../components/TimeLimitModal.tsx";
 type ApiTest = Record<string, any>;
 type Quiz = { id: string; title: string; questions: number; createdAt: string; pin?: string };
 
+const API_BASE = "https://knighthoot.app";
+const api = (p: string) => `${API_BASE}${p.startsWith("/") ? p : `/${p}`}`;
+
 // --- Auth headers ---
 function getAuthHeaders() {
   const token =
@@ -15,10 +18,53 @@ function getAuthHeaders() {
 
   return {
     "Content-Type": "application/json",
-    ...(token
-      ? { Authorization: `Bearer ${token}`, "x-access-token": token }
-      : {}),
+    ...(token ? { Authorization: `Bearer ${token}`, "x-auth-token": token, "x-access-token": token, } : {}),
   };
+}
+function getTeacherId(): string {
+  // 1) Try to decode from the JWT
+  const token =
+    localStorage.getItem("token") ||
+    localStorage.getItem("accessToken") ||
+    sessionStorage.getItem("token");
+
+  if (token && token.includes(".")) {
+    try {
+      const json = JSON.parse(atob(token.split(".")[1]));
+      const raw =
+        json.TID ??
+        json.tid ??
+        json.teacherId ??
+        json.teacherID ??
+        json.uid ??
+        json.id ??
+        json.sub;
+      if (raw != null) return String(raw);
+    } catch {}
+  }
+
+  // 2) Fallback to stored user/profile
+  const storedUser =
+    localStorage.getItem("user") ||
+    sessionStorage.getItem("user") ||
+    localStorage.getItem("profile");
+  if (storedUser) {
+    try {
+      const u = JSON.parse(storedUser);
+      const raw =
+        u.TID ?? u.tid ?? u.teacherId ?? u.teacherID ?? u.uid ?? u.id;
+      if (raw != null) return String(raw);
+    } catch {}
+  }
+
+  // 3) Direct keys
+  const direct =
+    localStorage.getItem("TID") ||
+    localStorage.getItem("teacherId") ||
+    localStorage.getItem("userId");
+  if (direct) return String(direct);
+
+  throw new Error("Could not determine your Teacher ID (TID). Please re-login.");
 }
 
 // mapTests: capture the predefined PIN (whatever your backend calls it)
@@ -68,25 +114,38 @@ export default function StartTestPage() {
     setSelectedQuiz(quiz);
     setShowTimeModal(true);
   };
-  const confirmTime = (seconds: number) => {
-        if (!selectedQuiz) return;
-        setShowTimeModal(false);
+  const confirmTime = async (seconds: number) => {
+    if (!selectedQuiz) return;
 
-        navigate("/dashboard/teacher/start/waiting", {
-            state: {
-            quizId: selectedQuiz.id,
-            title: selectedQuiz.title,
-            timeLimit: seconds,
-            pin: selectedQuiz.pin, // <-- already predefined
-            },
-        });
+    try {
+      const tid = getTeacherId();
+      await fetch(api(`/api/endTest`), {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ ID: selectedQuiz.id, TID: Number(tid) }),
+      });
+    } catch (e) {
+      console.warn("Failed to pre-emptively end test, proceeding anyway:", e);
+    }
+
+    setShowTimeModal(false);
+    navigate("/dashboard/teacher/start/waiting", {
+      state: {
+        quizId: selectedQuiz.id,
+        title: selectedQuiz.title,
+        timeLimit: seconds,
+        pin: selectedQuiz.pin,
+        TID: Number(getTeacherId()),
+      },
+    });
   };
   useEffect(() => {
     (async () => {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`/api/test?TID=1`, { headers: getAuthHeaders() });
+        const tid = getTeacherId();
+        const res = await fetch(api(`/api/test?TID=${encodeURIComponent(tid)}`), { headers: getAuthHeaders() });
         const txt = await res.text();
         const json = txt ? JSON.parse(txt) : null;
 

@@ -1,25 +1,25 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom'; 
+import { Link, useNavigate } from 'react-router-dom';
 import SiteBackground from "../components/SiteBackground";
 import ucf from "../assets/ucf.png";
-import "../Register.css"; 
+import "../Register.css";
 
-function Login()
-{
-  const [message,setMessage] = useState('');
-  const [loginName,setLoginName] = useState('');
-  const [loginPassword,setPassword] = useState('');
+function Login() {
+  const [message, setMessage] = useState('');
+  const [loginName, setLoginName] = useState('');
+  const [loginPassword, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const navigate = useNavigate();
 
   function handleSetName(e: any): void {
     setLoginName(e.target.value);
   }
+
   function handleSetPassword(e: any): void {
     setPassword(e.target.value);
   }
 
-  async function doLogin(event:any): Promise<void> {
+  async function doLogin(event: any): Promise<void> {
     event.preventDefault();
     setMessage('');
     const body = JSON.stringify({ username: loginName, password: loginPassword });
@@ -36,7 +36,11 @@ function Login()
 
       // Try to read JSON (even on non-OK to show server error)
       let data: any = null;
-      try { data = await response.json(); } catch { /* ignore */ }
+      try {
+        data = await response.json();
+      } catch {
+        /* ignore */
+      }
 
       if (!response.ok) {
         const serverMsg = (data && (data.error || data.message)) || 'User/Password combination incorrect';
@@ -45,13 +49,7 @@ function Login()
       }
 
       // Save token (support various response shapes)
-      const token =
-        data?.token ??
-        data?.accessToken ??
-        data?.jwt ??
-        data?.data?.token ??
-        null;
-
+      const token = data?.token ?? data?.accessToken ?? data?.jwt ?? data?.data?.token ?? null;
       if (token) {
         localStorage.setItem('token', token);
       }
@@ -60,37 +58,18 @@ function Login()
       localStorage.setItem('user_data', JSON.stringify(data));
 
       // Try to find a usable teacher id for TID later
-      const user =
-        data?.user ??
-        data?.teacher ??
-        data?.profile ??
-        data?.data?.user ??
-        data;
-
-      const teacherId =
-        user?._id ??
-        user?.id ??
-        data?.teacherId ??
-        data?.TID ??
-        data?.id ??
-        null;
-
+      const user = data?.user ?? data?.teacher ?? data?.profile ?? data?.data?.user ?? data;
+      const teacherId = user?._id ?? user?.id ?? data?.teacherId ?? data?.TID ?? data?.id ?? null;
       if (teacherId) {
         localStorage.setItem('teacherId', String(teacherId));
       }
 
       // Decide role robustly
-      const isTeacher =
-        user?.role === 'teacher' ||
-        data?.role === 'teacher' ||
-        data?.isTeacher === true;
-
+      const isTeacher = user?.role === 'teacher' || data?.role === 'teacher' || data?.isTeacher === true;
       navigate(isTeacher ? '/dashboard/teacher' : '/dashboard/student', { replace: true });
-    }
-    catch (err: any) {
+    } catch (err: any) {
       setMessage(err?.message || 'Network error');
-    }
-    finally {
+    } finally {
       setBusy(false);
     }
   }
@@ -110,7 +89,6 @@ function Login()
       <div className="reg-stage">
         <section className="reg-card">
           <h2 className="reg-card__heading">Log in</h2>
-
           <form className="reg-form" onSubmit={doLogin}>
             <input
               type="text"
@@ -120,7 +98,6 @@ function Login()
               onChange={handleSetName}
               autoFocus
             />
-
             <div className="reg-password-wrap">
               <input
                 type="password"
@@ -130,21 +107,17 @@ function Login()
                 onChange={handleSetPassword}
               />
             </div>
-
             <p className="reg-inline-help">
               Forgot password?{" "}
               <Link to="/password-reset" className="reg-link">Reset your password</Link>
             </p>
-
             <button type="submit" className="reg-submit" disabled={busy}>
               {busy ? "Signing in..." : "Log in"}
             </button>
-
             <p className="reg-footer">
               Don’t have an account?{" "}
               <Link to="/account-type" className="reg-link">Sign up</Link>
             </p>
-
             {message && <p className="reg-error">{message}</p>}
           </form>
         </section>

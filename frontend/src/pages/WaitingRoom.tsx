@@ -81,27 +81,31 @@ export default function WaitingRoom() {
         <h2 className="wr-label">Game PIN</h2>
         <div className="wr-pin">
           {pin.split("").map((ch, i) => (
-            <span key={i} className="wr-pin__ch">{ch}</span>
+            <span key={i} className="wr-pin__ch" style={{ fontSize: '64px', padding: '24px 20px', lineHeight: 1,}}>
+    {ch}
+  </span>
           ))}
         </div>
 
-        <p className="wr-hint" style={{ marginTop: 16 }}>
+        <p className="wr-hint" style={{ marginTop: 24 }}>
           Ask students to enter this code on their devices.
         </p>
 
-        <div className="wr-actions" style={{ marginTop: 26 }}>
+        <div className="wr-actions" style={{ marginTop: 40 }}>
           <button
             className="btn btn--gold"
-            onClick={() => navigate("/dashboard/teacher/live", {
-              state: {
-                quizId: data.quizId,
-                title: data.title,
-                timeLimit: data.timeLimit,
-                pin: data.pin,
-                TID: getTIDRobust()
-              }
-            })}
-
+            onClick={() =>
+              navigate("/dashboard/teacher/live", {
+                state: {
+                  quizId: data.quizId,
+                  title: data.title,
+                  timeLimit: data.timeLimit,
+                  pin: data.pin,
+                  TID: getTIDRobust(),
+                  autoStart: true,              // ← add this line
+                },
+              })
+            }
           >
             Start Quiz
           </button>

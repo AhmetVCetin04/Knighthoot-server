@@ -83,6 +83,16 @@ app.post('/api/login' ,(req, res) => {
     handleLogin(req, res, Teachers, Students);
 });
 
+app.post('/api/resetPassword' ,(req, res) => {
+    handleResetPassword(req, res, Teachers, Students);
+});
+
+
+app.post('/api/deleteAccount' ,(req, res) => {
+    handleDeleteAccount(req, res, Teachers, Students);
+});
+
+
 
 app.post('/api/joinTest', auth, (req, res) => {
         handleJoinTest(req, res, Tests, Scores);
@@ -150,7 +160,7 @@ app.get('/api/test/:testId', auth, (req, res) => {
     handleReadTest(req, res, Tests);
 });
 app.get('/api/score/test/:testId', auth, (req, res) => {
-    handleSearchScoresByTest(req, res, Scores);
+    handleSearchScoresByTest(req, res, Scores, Students);
 });
 app.put('/api/test/:testId', auth, (req, res) => {
     handleUpdateTest(req, res, Tests);

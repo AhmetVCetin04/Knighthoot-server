@@ -37,6 +37,9 @@ async function handleJoinTest(req, res, Tests, Scores) {
 
 
         const questionCurrent = test.questions[test.currentQuestion]
+	console.log("JOINED TEST");
+	//console.log(test.currentQuestion);
+	//console.log(questionCurrent.question);
         res.status(200).json({
                 currentQuestion: test.currentQuestion,
                 totalQuestions: test.questions.length,

@@ -1,0 +1,243 @@
+/* src/styles/StudentJoin.css (Updated for Figma match + a11y contrast) */
+
+/* site background already on <main class="site-bg"> */
+.site-bg {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* The main container remains the same */
+.student-page {
+  min-height: 100vh;
+  padding: 0 16px 0;
+  display: grid;
+  place-items: center;
+  background: #0a0a0a;
+  color: #fff;
+}
+
+/* ===== Header ===== */
+.student-live-header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 77px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  background: #232323;
+  border-bottom: 1px solid rgba(255, 255, 255, .08);
+  padding: 0 20px;
+  z-index: 10;
+  color: #e7e7e7;
+}
+
+.student-live-header__left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 700;
+}
+
+.student-live-header__brand {
+  font-family: "Oswald", "Montserrat", sans-serif;
+  font-size: 26px;
+  color: #d5ac16;
+}
+
+.student-live-header__right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.back-btn {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.22);
+  color: #e8e8e8;
+  font-size: 18px;
+  font-weight: 550;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 6px;
+}
+.back-btn:hover { background: rgba(255,255,255,0.09); }
+.back-btn:focus-visible {
+  outline: 2px solid #ffd84d;
+  outline-offset: 2px;
+}
+
+/* ===== CARD STYLES ===== */
+.student-card {
+  width: min(420px, 92vw);
+  background: #232323;
+  border: 1px solid #3d3d3d;
+  border-radius: 10px;
+  padding: 0;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  text-align: center;
+  color: #f2f2f2; /* ensure default text on card passes contrast */
+}
+
+/* Inner card sections for structure and dividers */
+.student-card-section {
+  padding: 20px 24px;
+}
+
+/* Top section with user name */
+.student-card-section.user-info {
+  border-bottom: 1px solid #3d3d3d; /* Divider line */
+}
+
+/* Middle section with description */
+.student-card-section.join-quiz-details {
+  padding-bottom: 24px;
+}
+.student-card h2 {
+  text-align: left;
+  font-size: 24px;
+  margin: 0 0 8px;
+  color: #ffffff;
+}
+.instructions {
+  margin: 0;
+  text-align: left;
+  font-size: 15px;
+  color: #dcdcdc;
+}
+
+/* Input and Button Styles */
+.input-group {
+  padding: 0 24px 24px;
+  text-align: left;
+}
+.access-code-label {
+  display: block;
+  padding-bottom: 24px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: #e6e6e6; /* better contrast on #232323 */
+}
+.student-input {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.22); /* brighter border for contrast */
+  background: #2c2c2c; /* slightly lighter than #141414 for readability */
+  color: #ffffff;
+  margin: 0;
+  box-sizing: border-box;
+  text-align: center;
+  font-size: 18px;
+  text-transform: uppercase;
+}
+.student-input::placeholder {
+  color: #cfcfcf;
+}
+.student-input:focus-visible {
+  outline: 2px solid #ffd84d; /* visible focus ring */
+  outline-offset: 2px;
+}
+
+/* CTA Button: brand gold with dark text for 4.5:1+ */
+.student-btn {
+  display: block;
+  width: calc(100% - 48px);
+  margin: 0 24px 24px;
+  padding: 12px 16px;
+  border-radius: 6px;
+  border: 0;
+  background: #c7a144;
+  color: #111;            /* dark text improves contrast */
+  font-weight: 700;
+  font-size: 18px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+.student-btn:hover { filter: brightness(0.98); }
+.student-btn:focus-visible {
+  outline: 2px solid #ffd84d;
+  outline-offset: 2px;
+}
+.student-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* Error message: readable on dark */
+.student-error { color: #ffb4b4; margin-top: 12px; }
+.muted { color: #bdbdbd; }
+
+.spinner {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 3px solid #444; border-top-color: #c7a144;
+  animation: spin 0.7s linear infinite; margin: 14px 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Prefer even more contrast for users who request it */
+@media (prefers-contrast: more) {
+  .student-card, .instructions { color: #ffffff; }
+  .student-input { background: #303030; border-color: #ffffff; }
+  .back-btn { background: #2a2a2a; border-color: #ffffff; color: #ffffff; }
+}
+
+/* --- A11y contrast hotfixes (StudentJoin) --- */
+
+/* Make brand gold pass contrast (large text still looks on-brand) */
+.student-live-header__brand { color: #ffd84d; }
+
+/* Ensure all body text inside the dark card safely passes */
+.student-card,
+.student-card h2,
+.instructions,
+.access-code-label { color: #ffffff; }
+
+/* Back button text contrast + clear focus ring */
+.back-btn { color: #ffffff; background: rgba(255,255,255,0.06); }
+.back-btn:focus-visible { outline: 2px solid #ffd84d; outline-offset: 2px; }
+
+/* Inputs already OK; just keep placeholder clearly readable */
+.student-input::placeholder { color: #e3e3e3; }
+
+/* If any links appear here, keep them readable against dark */
+.student-page a { color: #ffd84d; text-decoration: underline; }
+.student-page a:focus-visible { outline: 2px solid #ffd84d; outline-offset: 2px; }
+/* --- FINAL A11y Hotfix: Force 4.5:1+ color contrast --- */
+
+/* Ensure visible contrast for gold elements on dark */
+.student-btn {
+  background: #ffcc33; /* brighter gold for >4.5:1 contrast */
+  color: #000;          /* dark text ensures high contrast */
+}
+
+/* Improve readability of header gold */
+.student-live-header__brand {
+  color: #ffcc33 !important;
+}
+
+/* Make text and labels pure white for clarity */
+.student-card h2,
+.instructions,
+.access-code-label,
+.back-btn {
+  color: #ffffff !important;
+}
+
+/* Improve input visibility */
+.student-input {
+  background: #2a2a2a !important;
+  border: 1px solid #ffffff !important;
+  color: #ffffff !important;
+}
+
+.student-input::placeholder {
+  color: #dddddd !important;
+}
+
+/* Ensure visible focus */
+.student-input:focus-visible,
+.student-btn:focus-visible,
+.back-btn:focus-visible {
+  outline: 2px solid #ffcc33 !important;
+  outline-offset: 2px;
+}

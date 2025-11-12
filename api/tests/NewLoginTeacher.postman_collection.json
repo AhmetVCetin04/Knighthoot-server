@@ -1,0 +1,47 @@
+{
+  "info": {
+    "name": "Login Teacher API Test",
+    "_postman_id": "e17852d4-de1e-4a47-9239-6cad98f49593",
+    "description": "Tests teacher login API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Login - Teacher",
+      "request": {
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"username\":\"gandalf001\",\"password\":\"NewTeacherPass123\"}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["api","login"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let res = pm.response.json();",
+              "pm.test(\"Login OK\", () => pm.expect(pm.response.code).to.eql(200));",
+              "pm.test(\"Has token\", () => pm.expect(res).to.have.property(\"token\"));",
+              "pm.test(\"Correct role\", () => pm.expect(res.role).to.eql(\"teacher\"));",
+              "",
+              "// ✅ Save unique teacher env vars",
+              "pm.environment.set(\"login_teacher_token\", res.token);",
+              "pm.environment.set(\"login_teacher_dbId\", res._id);",
+              "pm.environment.set(\"login_teacher_ID\", res.id);"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "https://knighthoot.app" }
+  ]
+}

@@ -1,6 +1,7 @@
 // File: api/searchScoresByTest.js
 
-async function handleSearchScoresByTest(req, res, Scores) {
+// NOTE: This function now requires the 'Students' collection.
+async function handleSearchScoresByTest(req, res, Scores, Students) {
     // Get the test ID from the URL path parameter
     const testIdParam = req.params.testId;
 
@@ -8,12 +9,8 @@ async function handleSearchScoresByTest(req, res, Scores) {
          return res.status(400).json({ error: 'Test ID is required in the URL path.' });
     }
 
-    // This code assumes testID in the Scores collection is a STRING (like "Math101" or "123").
-    // If testID in Scores is a NUMBER, you'll need to parseInt(testIdParam).
-    // Based on your Tests schema, ID is a string, so testID in Scores is likely also a string.
-
     try {
-        // Find all scores matching the test's custom ID (testID)
+        // Step 1: Find all scores for the given test ID
         const scores = await Scores.find({ testID: testIdParam }).toArray();
 
         if (scores.length === 0) {
@@ -21,7 +18,45 @@ async function handleSearchScoresByTest(req, res, Scores) {
              return res.status(200).json([]); // Return an empty array
         }
 
-        res.status(200).json(scores); // Send back the array of score documents
+        // Step 2: Get all the unique Student IDs (SID) from the scores
+        // We use a Set to ensure IDs are unique, then convert back to an array
+        const studentIds = [...new Set(scores.map(score => score.SID))];
+
+        // Step 3: Find all students who match these IDs in a single query
+        const students = await Students.find({ ID: { $in: studentIds } }).toArray();
+
+        // Step 4: Create a "lookup map" for quick access to student data
+        // This maps an ID (e.g., 3) to the full student object
+        const studentMap = new Map();
+        students.forEach(student => {
+            studentMap.set(student.ID, student);
+        });
+
+        // Step 5: Combine the score data with the student data
+        const detailedScores = scores.map(score => {
+            const student = studentMap.get(score.SID);
+            
+            // Define what to return if a student is not found (e.g., deleted)
+            const studentInfo = student
+                ? {
+                    firstName: student.firstName,
+                    lastName: student.lastName,
+                    username: student.username
+                  }
+                : {
+                    firstName: "Deleted",
+                    lastName: "User",
+                    username: "deleted_user"
+                  };
+
+            // Return a new object with the score fields and the new student info
+            return {
+                ...score, 
+                ...studentInfo 
+            };
+        });
+
+        res.status(200).json(detailedScores); // Send back the combined array
 
     } catch (e) {
         console.error("Get Scores by Test error:", e);

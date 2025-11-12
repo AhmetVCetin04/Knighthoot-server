@@ -1,0 +1,153 @@
+
+/* Main container: Padding for fixed header and background */
+.reports-page-container {
+    padding-top: 77px; /* Account for fixed header height */
+    min-height: 100vh;
+    background: #0a0a0a; /* Dark background */
+    color: #e9e9ec; 
+}
+
+.reports-content-area {
+    padding: 24px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+/* --- Stats Section --- */
+.reports-stats-section {
+    display: flex;
+    gap: 40px;
+    align-items: center; /* Align stats and button */
+    margin-bottom: 24px;
+}
+
+.reports-stat-item {
+    font-size: 14px;
+    color: #aaa;
+}
+
+.reports-stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #e9e9ec;
+    margin-top: 4px;
+}
+
+.reports-stat-value--average {
+    color: #9be28a; /* Green for high average */
+}
+
+/* --- CTA Button (Join New Quiz) --- */
+.reports-cta-button {
+    background-color: #d5ac16;
+    color: #121212;
+    font-weight: 700;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-size: 16px;
+    margin-left: auto; /* Push to the right */
+    align-self: flex-start;
+}
+
+.reports-cta-button:hover {
+    background-color: #ffc904;
+}
+
+/* --- Search and Filters --- */
+.reports-controls {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.reports-search-input,
+.reports-filter-select {
+    padding: 10px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    background-color: #1f1f22;
+    color: #e9e9ec;
+    outline: none;
+    font-size: 14px;
+}
+
+.reports-search-input {
+    flex-grow: 1;
+}
+
+/* --- Individual Quiz Report Card List --- */
+.quiz-report-card-list {
+    display: grid;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.quiz-report-card {
+    background: #1f1f22;
+    border-left: 5px solid #d5ac16; /* Gold stripe on the left */
+    border-radius: 8px;
+    padding: 16px;
+    display: grid;
+    grid-template-columns: 1fr auto; /* Title on left, Score on right */
+    align-items: center;
+    transition: background-color 0.2s;
+    cursor: pointer;
+}
+
+.quiz-report-card:hover {
+    background-color: #2a2a2d;
+}
+
+.quiz-report-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #e9e9ec;
+    margin-bottom: 4px;
+}
+
+.quiz-report-meta-line {
+    font-size: 13px;
+    color: #aaa;
+    display: flex;
+    gap: 12px;
+}
+
+.quiz-report-score-box {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.quiz-report-score-fraction {
+    font-size: 20px;
+    font-weight: 800;
+    color: #9be28a; /* Default Green */
+}
+
+.quiz-report-score-percent {
+    font-size: 13px;
+    color: #9be28a; /* Default Green */
+}
+
+/* Ensure default text on dark cards is high-contrast */
+.reports-content-area { color: #f1f1f1; }
+
+.quiz-report-card {
+  background: #232323;
+  color: #f1f1f1;
+}
+
+/* The two numbers in the right-hand score box must always pass AA */
+.quiz-report-score-box { color: #f1f1f1; }
+.quiz-report-score-fraction,
+.quiz-report-score-percent { font-weight: 700; }
+
+/* Keep the “Join New Quiz” button readable on its yellow background */
+.reports-cta-button {
+  color: #111;               /* already good contrast on #c7a144/#ffd24a */
+  background: #ffd24a;       /* slightly brighter for consistent AA */
+}

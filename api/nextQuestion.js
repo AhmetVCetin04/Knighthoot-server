@@ -54,6 +54,7 @@ async function handleNextQuestion(req, res, db) {
                 { _id: test._id },
                 { $inc: { currentQuestion: 1 } } // Increment the question index
             );
+	console.log("ADVANCED TO NEXT QUESTION");
 
             res.status(200).json({
                 message: `Advanced to question ${nextQuestionIndex + 1}.`,

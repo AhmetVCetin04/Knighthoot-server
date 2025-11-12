@@ -1,0 +1,177 @@
+/* === QuizView Page Styles (Based on Figma image_63f0bb.png) === */
+/* Add these rules to QuizView.css */
+.qv-main-wrapper {
+    min-height: 100vh;
+    width: 100%;
+    background-color: #1A1A1A; /* Dark background */
+    color: white;
+    /* Other global styles */
+}
+.qv-content-area {
+    width: 90%;
+    padding: 32px; /* Replaces the p-8 from Tailwind */
+}
+/* Ensure you have these new wrapper classes in your CSS! */
+/* Overall Page Wrapper */
+.qv-wrap {
+  padding: 32px 0; /* Vertical breathing room */
+  color: #e9e9ec;
+}
+
+/* --- Header & Actions --- */
+.qv-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 16px;
+}
+
+.qv-title {
+  font-size: 38px;
+  font-weight: 700;
+  color: #e9e9ec;
+  margin: 0;
+}
+
+.qv-meta {
+  font-size: 16px;
+  color: #a0a0a0;
+  margin-top: 4px;
+}
+
+.qv-actions {
+  display: flex;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+/* General Button Styles */
+.qv-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  white-space: nowrap;
+}
+
+.qv-btn--edit {
+  background: #ffcc00; /* Yellow */
+  color: #111;
+}
+
+.qv-btn--preview {
+  background: #3a3a40; /* Dark Gray */
+  color: #e9e9ec;
+}
+
+.qv-btn--back {
+  background: none;
+  color: #a0a0a0;
+  border: 1px solid #3a3a40;
+}
+
+
+/* --- Question Cards --- */
+.qv-question-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px; /* Space between question cards */
+}
+
+.qv-question-card {
+  background: #1c1c1c; /* Slightly lighter than background */
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.qv-question-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px dashed #3a3a40;
+  padding-bottom: 10px;
+}
+
+.qv-question-number {
+  font-size: 24px;
+  font-weight: 700;
+  background: #ffcc00; /* Yellow box */
+  color: #111;
+  padding: 8px 12px;
+  border-radius: 8px;
+  line-height: 1;
+}
+
+.qv-question-text {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+}
+
+
+/* --- Options Grid --- */
+.qv-options-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.qv-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.qv-option-letter {
+  font-weight: 700;
+  font-size: 18px;
+}
+
+/* Correct Answer Styles */
+.qv-option--correct {
+  background-color: #386738; /* Dark Green background */
+  border: 2px solid #5aa75a;
+}
+.qv-option--correct .qv-option-letter {
+  color: #e9e9ec;
+}
+
+/* Incorrect/Normal Answer Styles */
+.qv-option--incorrect {
+  background-color: #3a3a40; /* Darker option background */
+  border: 1px solid #4a4a50;
+}
+.qv-option--incorrect .qv-option-letter {
+  color: #ffcc00; /* Gold letter */
+}
+
+
+/* --- Footer --- */
+.qv-correct-answer {
+  color: #5aa75a; /* Green text */
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.qv-correct-value {
+  color: #e9e9ec;
+}
+
+/* --- Utility Messages --- */
+.qv-message {
+  padding: 24px;
+  color: #a0a0a0;
+}
+.qv-error {
+  color: crimson;
+  white-space: pre-wrap;
+}

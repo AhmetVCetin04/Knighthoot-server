@@ -1,0 +1,127 @@
+.finish-page {
+  min-height: 100vh;
+  background: #0f0f10;
+  color: #fff;
+  padding: 16px;
+}
+
+.finish-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255,216,77,.25);
+  padding-bottom: 8px;
+}
+
+.finish-title {
+  margin: 0;
+  color: #ffd84d;
+  font-size: 24px;
+}
+.finish-sub { color: #c9c9c9; font-weight: 500; }
+
+.finish-pin { color: #c9c9c9; }
+
+.finish-hero {
+  text-align: center;
+  margin-top: 28px;
+}
+.finish-badge {
+  font-size: 48px;
+  margin-bottom: 8px;
+}
+.finish-headline {
+  font-size: 28px;
+  margin: 4px 0;
+}
+.finish-caption {
+  color: #c9c9c9;
+}
+
+.finish-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.btn-primary {
+  background: #ffd84d;
+  color: #1b1b1b;
+  border: 1px solid #c39b0e;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.btn-secondary {
+  background: #2b2b2b;
+  color: #fff;
+  border: 1px solid #3a3a3a;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.avg-panel { margin-top: 28px; }
+.avg-hint { color: #c9c9c9; margin-bottom: 8px; }
+.avg-textarea {
+  width: 100%;
+  min-height: 120px;
+  border-radius: 8px;
+  padding: 10px;
+  border: 1px solid #3a3a3a;
+  background: #1b1b1b;
+  color: #fff;
+  font-family: monospace;
+  font-size: 14px;
+}
+.avg-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+}
+.avg-error { color: #ff9b9b; white-space: pre-wrap; }
+
+.avg-results { margin-top: 18px; }
+
+.avg-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.card {
+  background: #171717;
+  border: 1px solid #2a2a2a;
+  border-radius: 10px;
+  padding: 12px;
+}
+.card-label { color: #bfbfbf; font-size: 12px; }
+.card-value { font-size: 22px; font-weight: 700; margin-top: 4px; }
+
+.avg-table-wrap {
+  overflow-x: auto;
+  border: 1px solid #2a2a2a;
+  border-radius: 10px;
+}
+.avg-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.avg-table th, .avg-table td {
+  padding: 10px 12px;
+}
+.avg-table th {
+  background: #171717;
+  border-bottom: 1px solid #2a2a2a;
+  color: #bfbfbf;
+  text-align: left;
+  font-weight: 600;
+}
+.avg-table td {
+  border-top: 1px solid #2a2a2a;
+}
+.avg-table td.num { text-align: right; }

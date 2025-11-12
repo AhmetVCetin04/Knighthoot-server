@@ -1,0 +1,53 @@
+{
+  "info": {
+    "name": "Join Test API",
+    "_postman_id": "join-test-001",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Student Joins Test",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{login_student_token}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/joinTest",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "joinTest"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"ID\": \"{{login_student_ID}}\",\n  \"PIN\": \"{{created_test_pin}}\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let body = pm.response.json();",
+              "",
+              "pm.test('Join test success', () => pm.expect(pm.response.code).to.eql(200));",
+              "",
+              "// Store the current question index",
+              "pm.environment.set('current_question', body.currentQuestion);",
+              "",
+              "// Store total questions for later navigation",
+              "pm.environment.set('total_questions', body.totalQuestions);",
+              "",
+              "// Store question text and options (optional, but useful for debugging)",
+              "pm.environment.set('current_question_text', body.question);",
+              "pm.environment.set('current_question_options', JSON.stringify(body.options));"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5173" }
+  ]
+}

@@ -1,8 +1,7 @@
-/* Fill the Viewport */
+/**************** BASE ****************/
 html, body, #root { height: 100%; }
 body { margin: 0; }
 
-/* Site Background  */
 .site-bg {
   min-height: 100vh;
   width: 100%;
@@ -10,7 +9,7 @@ body { margin: 0; }
   flex-direction: column;
 }
 
-/* ===== Header ===== */
+/**************** HEADER (unchanged) ****************/
 .teachertopbar {
   position: fixed;
   top: 0; left: 0; right: 0;
@@ -24,131 +23,129 @@ body { margin: 0; }
   z-index: 10;
   color: #e7e7e7;
 }
-.teachertopbar__left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-weight: 700;
-}
-.teachertopbar__brand {
-  font-family: "Oswald", "Montserrat", sans-serif;
-  font-size: 26px;
-  color: #d5ac16;
-}
-.teachertopbar__divider {
-  color: #8a8a8a;
-}
-.teachertopbar__context {
-  color: #d0d0d0;
-  font-weight: 600;
-}
-.teachertopbar__right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.teachertopbar__logo {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  object-fit: contain;
-}
+.teachertopbar__left { display: flex; align-items: center; gap: 12px; font-weight: 700; }
+.teachertopbar__brand { font-family: "Oswald","Montserrat",sans-serif; font-size: 26px; color: #d5ac16; }
+.teachertopbar__divider { color: #8a8a8a; }
+.teachertopbar__context { color: #d0d0d0; font-weight: 600; }
+.teachertopbar__right { display: flex; align-items: center; gap: 12px; }
+.teachertopbar__logo { width: 32px; height: 32px; border-radius: 50%; object-fit: contain; }
 .teachertopbar__logout {
-  padding: 8px 12px;
-  background: #2a2a31;
-  color: #e7e7e7;
-  border: 1px solid rgba(255, 255, 255, .10);
-  border-radius: 10px;
-  font-weight: 600;
-  cursor: pointer;
+  padding: 8px 12px; background: #2a2a31; color: #e7e7e7;
+  border: 1px solid rgba(255,255,255,.10); border-radius: 10px; font-weight: 600; cursor: pointer;
 }
-.teachertopbar__logout:hover {
-  background: #34343b;
+.teachertopbar__logout:hover { background: #34343b; }
+
+/**************** STAGE (fit viewport under header) ****************/
+
+
+/* ------- CENTER WHOLE SECTION UNDER HEADER (no scroll jump) ------- */
+:root { --header-h: 77px; }              /* match your header height */
+
+.teacher__stage{
+  margin-top: var(--header-h);
+  min-height: calc(100vh - var(--header-h));   /* fill area below header */
+  display: grid;                               
+  grid-template-rows: auto 1fr;                /* welcome + cards */
+  align-content: center;                        /* vertical centering */
+  justify-items: center;                        /* horizontal centering */
+  padding: 12px 24px;
+  overflow: hidden;
 }
 
-/* ===== Stage ===== */
-.teacher__stage {
-  padding-top: 100px; /* space for fixed header */
-  text-align: center;
-  flex: 1;
+/* tighten welcome so grid can center perfectly */
+.teacher__welcome h1{ margin: 0 0 6px; }
+.teacher__welcome p { margin: 0 0 20px; }
+
+/* ------- GRID: true centering and safe spacing ------- */
+.teacher__grid{
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(420px, 1fr)); /* auto fits 3, shrinks to 2/1 on narrow */
+  gap: 32px 24px;                         /* 32px row gap prevents any touching */
+  width: 100%;
+  max-width: 1500px;
+  align-content: center;                  /* center rows vertically in stage */
+  justify-content: center;                /* center grid horizontally */
 }
 
-/* Welcome text */
-.teacher__welcome h1 {
-  font-size: 32px;
-  margin-bottom: 4px;
-  color: #fff;
-}
-.teacher__welcome p {
-  margin-top: 0;
-  color: #ccc;
+/* equal row heights; tiles expand to fill row height */
+.teacher__grid > .teacher__tile{
+  height: 100%;
+  min-height: 0;
 }
 
-/* ===== Grid ===== */
-.teacher__grid {
-  max-width: 1100px;
-  margin: 40px auto;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 20px;
-  padding: 0 20px;
+/* ------- TILES: soften shadow so it can't bleed into next row ------- */
+.teacher__tile{
+  display: flex; align-items: center; justify-content: flex-start;
+  gap: 1.1rem; padding: 1.15rem 1.9rem; border-radius: 12px;
+  box-shadow: 0 6px 14px rgba(0,0,0,.24);     /* smaller blur */
+  transition: box-shadow .15s ease;           /* no translateY */
 }
-@media (max-width: 900px) {
-  .teacher__grid { grid-template-columns: repeat(2, 1fr); }
+.teacher__tile:hover{ box-shadow: 0 8px 18px rgba(0,0,0,.30); }
+
+.teacher__tile img,
+.teacher__tile .tile__icon{ width:52px; height:52px; object-fit:contain; flex:0 0 52px; }
+.teacher__tile h3{ margin:0; font-size:1.22rem; }
+.teacher__tile p { margin:.25rem 0 0; font-size:1.02rem; }
+
+/* (Optional) responsive fallbacks if the viewport gets narrow */
+@media (max-width: 1200px){
+  .teacher__grid{ grid-template-columns: repeat(2, minmax(420px, 1fr)); }
 }
-@media (max-width: 600px) {
-  .teacher__grid { grid-template-columns: 1fr; }
+@media (max-width: 880px){
+  .teacher__grid{ grid-template-columns: minmax(320px, 1fr); }
 }
 
-/* ===== Tiles ===== */
-.teacher__tile {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  border-radius: 12px;
-  border: 1px solid rgba(255,255,255,.08);
-  padding: 22px;
-  text-align: left;
-  cursor: pointer;
-  transition: transform .15s ease, box-shadow .15s ease;
-}
-.teacher__tile:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0,0,0,.35);
-}
-.teacher__tile img {
-  width: 42px;
-  height: 42px;
-  object-fit: contain;
-}
-.teacher__tile h3 {
-  margin: 0;
-  font-size: 20px;
-  font-weight: 700;
-}
-.teacher__tile p {
-  margin: 4px 0 0;
-  font-size: 14px;
-}
 
-/* Color variants */
+/**************** COLOR VARIANTS ****************/
 .gold {
-  background: linear-gradient(#d2ac3d, #c39a1f);
-  color: #141414;
+  background: linear-gradient(90deg, #c4961a, #e4b700);
+  color: #0b0b0b;
+  border: none;
 }
 .gold-dark {
-  background: linear-gradient(#b88f25, #9b7b17);
-  color: #141414;
+  background: linear-gradient(90deg, #caa015, #b8860b);
+  color: #0b0b0b;
 }
 .silver {
-  background: linear-gradient(#dcdde2, #c6c7cd);
-  color: #141414;
+  background: #d6d6d6;
+  color: #151515;
 }
 .silver-dark {
-  background: linear-gradient(#a2a8b6, #8f95a1);
-  color: #141414;
+  background: linear-gradient(180deg, #8b94a0, #7b838c);
+  color: #121212;
 }
 .bronze {
-  background: linear-gradient(#c4ad8e, #b39a7a);
-  color: #141414;
+  background: linear-gradient(180deg, #b89f82, #a7896e);
+  color: #161616;
 }
+
+/* 1) Center the whole block between header and bottom — no creeping scroll */
+:root { --header-h: 77px; }
+
+.teacher__stage{
+  margin-top: var(--header-h);
+  min-height: calc(100vh - var(--header-h));
+  display: grid;
+  grid-template-rows: auto 1fr;   /* welcome + grid */
+  place-content: center;          /* vertical + horizontal centering */
+  justify-items: center;
+  padding: 0 24px;                /* no vertical padding to avoid scroll */
+  overflow: hidden;
+}
+
+/* 2) Grid spacing and responsive columns so tiles never touch */
+.teacher__grid{
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+  gap: 32px 24px;                 /* enough row gap so shadows can't bleed */
+  max-width: 1500px;
+  width: 100%;
+  align-content: center;
+}
+
+/* 3) Softer shadows (prevents visual overlap) */
+.teacher__tile{
+  box-shadow: 0 6px 14px rgba(0,0,0,.24);
+  transition: box-shadow .15s ease;   /* no translateY */
+}
+.teacher__tile:hover{ box-shadow: 0 8px 18px rgba(0,0,0,.30); }

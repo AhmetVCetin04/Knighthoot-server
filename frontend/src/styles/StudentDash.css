@@ -1,8 +1,12 @@
+/* =======================
+   Student Dashboard Styles 
+   ======================= */
+
 /* Fill the Viewport */
 html, body, #root { height: 100%; }
 body { margin: 0; }
 
-/* Site Background  */
+/* Site Background */
 .site-bg {
   min-height: 100vh;
   width: 100%;
@@ -10,7 +14,7 @@ body { margin: 0; }
   flex-direction: column;
 }
 
-/* ===== Header (copied & adjusted from Teacher) ===== */
+/* ===== Header ===== */
 .studenttopbar{
   position: fixed;
   top: 0; left: 0; right: 0;
@@ -30,7 +34,7 @@ body { margin: 0; }
 .studenttopbar__brand{
   font-family: "Oswald","Montserrat",sans-serif;
   font-size: 26px;
-  color: #d5ac16;               /* UCF gold */
+  color: #d5ac16;               
 }
 .studenttopbar__divider{ color: #8a8a8a; }
 .studenttopbar__context{ color: #d0d0d0; font-weight: 600; }
@@ -39,76 +43,171 @@ body { margin: 0; }
   display: flex; align-items: center; gap: 12px; justify-self: end;
 }
 .studenttopbar__logo{
-  width: 32px; height: 32px; border-radius: 50%; object-fit: contain;
+  width: 40px; 
+  height: 40px; 
+  border-radius: 50%; object-fit: contain;
 }
-.studenttopbar__logout{
+.studenttopbar__logout{ 
   padding: 8px 12px; background: #2a2a31; color: #e7e7e7;
   border: 1px solid rgba(255,255,255,.10); border-radius: 10px;
   font-weight: 600; cursor: pointer;
 }
 .studenttopbar__logout:hover{ background: #34343b; }
 
+
 /* ===== Stage ===== */
-.student__stage{
+.teacher__stage {
   padding-top: 100px; /* space for fixed header */
   text-align: center;
+  flex: 1;
 }
 
-/* Welcome text */
-.student__welcome h1{
-  font-size: 32px; margin-bottom: 4px; color: #fff;
+/* Welcome text  */
+.teacher__welcome h1 {
+  font-family: "Oswald", "Montserrat", "Arial Black", sans-serif;
+  font-size: 36px;
+  margin-bottom: 4px;
+  color: #fff;
 }
-.student__welcome p{
-  margin-top: 0; color: #ccc;
+.teacher__welcome p {
+  font-family: "Oswald", "Montserrat", "Arial Black", sans-serif;
+  margin-top: 6px;
+  color: #c8c8c8;
 }
 
-/* ===== Grid (3 tiles) ===== */
-.student__grid{
-  max-width: 1000px;
+/* ===== Grid (2 × 2 big tiles) ===== */
+.teacher__grid {
+  max-width: 1280px;
   margin: 40px auto;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0,1fr));
-  gap: 20px;
-  padding: 0 20px;
-}
-@media (max-width: 900px){
-  .student__grid{ grid-template-columns: repeat(2, 1fr); }
-}
-@media (max-width: 600px){
-  .student__grid{ grid-template-columns: 1fr; }
+  grid-template-columns: repeat(2, minmax(420px, 1fr)); 
+  gap: 18px;
+  padding: 0 24px;
 }
 
-/* ===== Tiles ===== */
-.student__tile{
-  display: flex; align-items: center; gap: 18px;
-  border-radius: 12px; border: 1px solid rgba(255,255,255,.08);
-  padding: 22px; text-align: left; cursor: pointer;
-  transition: transform .15s ease, box-shadow .15s ease;
+@media (max-width: 980px) {
+  .teacher__grid {
+    grid-template-columns: 1fr; 
+  }
 }
-.student__tile:hover{
+
+/* ===== Tiles ) ===== */
+.teacher__tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.08);
+  padding: 22px 26px;
+  min-height: 140px;                
+  text-align: center;
+  cursor: pointer;
+  box-shadow: 0 14px 28px rgba(0,0,0,.35);
+  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+}
+
+.teacher__tile:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0,0,0,.35);
-}
-.student__tile img{
-  width: 42px; height: 42px; object-fit: contain;
-}
-.student__tile h3{
-  margin: 0; font-size: 20px; font-weight: 700;
-}
-.student__tile p{
-  margin: 4px 0 0; font-size: 14px;
+  box-shadow: 0 18px 34px rgba(0,0,0,.45);
 }
 
-/* Color variants */
-.gold{
+.teacher__tile img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  flex: 0 0 auto;    
+}
+
+.teacher__tile h3 {
+  font-family: "Oswald", "Montserrat", "Arial Black", sans-serif;
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.teacher__tile p {
+  font-family: "Oswald", "Montserrat", "Arial Black", sans-serif;
+  margin: 6px 0 0;
+  font-size: 15px;
+  opacity: .9;
+}
+
+.gold {
   background: linear-gradient(#d2ac3d, #c39a1f);
   color: #141414;
 }
-.silver{
+.gold-dark {
+  background: linear-gradient(#b88f25, #9b7b17);
+  color: #141414;
+}
+.silver {
   background: linear-gradient(#dcdde2, #c6c7cd);
   color: #141414;
 }
-.silver-dark{
+.silver-dark {
   background: linear-gradient(#a2a8b6, #8f95a1);
   color: #141414;
+}
+
+/* ===== Account Dropdown ===== */
+.userMenu { position: relative; }
+.userMenu__btn {
+  background:#2c2c2c;
+  color:#e7e7e7;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:8px;
+  padding:8px 12px;
+  cursor:pointer;
+}
+.userMenu__list {
+  position:absolute;
+  right:0; top:110%;
+  background:#1f1f1f;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:10px;
+  min-width:200px;
+  padding:6px;
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  z-index:20;
+  box-shadow: 0 12px 28px rgba(0,0,0,.45);
+}
+.userMenu__list > button {
+  background:transparent;
+  color:#e7e7e7;
+  text-align:left;
+  padding:10px 12px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.userMenu__list > button:hover { background:rgba(255,255,255,.08); }
+
+
+/* ===== FORCE TILE COLORS ===== */
+.teacher__tile.gold {
+  background: linear-gradient(180deg, #F0C419 0%, #c4961a 100%) !important;
+  color: #111 !important;
+  border-color: rgba(0,0,0,.12) !important;
+}
+.teacher__tile.gold-dark {
+  background: linear-gradient(180deg, #E2E3E8 0%, #d6d6d6 100%) !important;
+  color: #111 !important;
+  border-color: rgba(0,0,0,.14) !important;
+}
+.teacher__tile.silver {
+  background: linear-gradient(180deg, #D9A70E 0%, #B8860B 100%) !important;
+  color: #141414 !important;
+  border-color: rgba(0,0,0,.10) !important;
+}
+.teacher__tile.silver-dark {
+  background: linear-gradient(180deg, #C2C7D0 0%, #8b94a0 100%) !important;
+  color: #141414 !important;
+  border-color: rgba(0,0,0,.12) !important;
 }

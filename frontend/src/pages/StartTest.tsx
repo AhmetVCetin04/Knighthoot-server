@@ -23,13 +23,32 @@ export default function StartTestPage() {
 
 
   async function handleJoin(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    if (!code.trim()) return;
-        // const resp = await fetch("/api/join-quiz", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ accessCode: code })});
-        // const data = await resp.json();
-        // if (!resp.ok) { /* show an error */ return; }
-    navigate(`/cards?code=${encodeURIComponent(code.trim())}`);
+  e.preventDefault();
+  const accessCode = code.trim();
+  if (!accessCode) return;
+
+  try {
+    const response = await fetch("https://knighthoot.app/api/join-quiz", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ accessCode }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert(data?.message || "Invalid access code");
+      return; // stop here on error
+    }
+
+    // success: go to next page (adjust route if your app needs quizId instead)
+    navigate(`/cards?code=${encodeURIComponent(accessCode)}`);
+  } catch (err) {
+    console.error(err);
+    alert("Something went wrong connecting to the server");
   }
+}
+
 
 
   return (

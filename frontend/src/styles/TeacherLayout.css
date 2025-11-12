@@ -12,77 +12,162 @@ body { margin: 0; }
 
 /* ===== Top Header ===== */
 .tl__topbar{
-  position:fixed; top:0; left:0; right:0; height:64px;
+  position:fixed; top:0; left:125px; right:0; height:64px;
   display:flex; align-items:center; justify-content:space-between;
   background:#2a2a2d; border-bottom:1px solid rgba(255,255,255,.08);
   padding:0 16px; z-index:30; color:#e9e9ec;
 }
-.tl__left{ display:flex; align-items:center; gap:12px; font-weight:700; }
+.tl__left{ padding-left: 34px; display:flex; align-items:center; gap:12px; font-weight:700; }
 .tl__brand{ color:#d5ac16; font-size:22px; }
 .tl__divider{ color:#8a8a8a; font-weight:600; }
 .tl__context{ color:#d0d0d0; font-weight:600; }
 .tl__right{ display:flex; align-items:center; gap:12px; }
 .tl__seal{ width:28px; height:28px; border-radius:50%; object-fit:contain; }
-.tl__logoutTop{
-  padding:6px 10px; background:#3a3a40; color:#e9e9ec;
-  border:1px solid rgba(255,255,255,.10); border-radius:8px;
-  font-weight:600; cursor:pointer;
+
+/* Header dropdown (Logout only) */
+.tl__user { position: relative; }
+.tl__userMenu{
+  position:absolute; right:0; top:110%;
+  background:#2a2a2d; border:1px solid rgba(255,255,255,.12);
+  border-radius:10px; min-width:160px; padding:6px;
+  display:flex; flex-direction:column; gap:4px; z-index:40;
+  box-shadow:0 12px 28px rgba(0,0,0,.45);
 }
-.tl__logoutTop:hover{ background:#46464c; }
-.tl__burger{
-  display:none; background:transparent; border:none; color:#e9e9ec; font-size:18px; cursor:pointer;
+.tl__userItem{
+  background:transparent; color:#e7e7e7; text-align:left;
+  padding:8px 10px; border:none; border-radius:8px; cursor:pointer; font-weight:600;
 }
+.tl__userItem:hover{ background:rgba(255,255,255,.08); }
 
 /* ===== Sidebar ===== */
-.tl__sidebar{
-  position:fixed; top:64px; left:0; bottom:0; width:240px;
-  background:#1f2022; border-right:1px solid rgba(255,255,255,.08);
-  z-index:25; transform:translateX(0); transition:transform .2s ease;
-  display:flex; flex-direction:column;
-}
-.tl__sideHeader{
-  height:64px; display:flex; align-items:center; justify-content:center;
-  border-bottom:1px solid rgba(255,255,255,.06);
-}
-.tl__sideSeal{ width:44px; height:44px; border-radius:50%; }
+:root { --sidebar-w: 120px; }   
 
-.tl__menu{ padding:10px; display:flex; flex-direction:column; gap:6px; }
-.tl__item{
-  display:flex; align-items:center; gap:12px;
-  padding:12px 10px; text-decoration:none; color:#e6e6ea; font-weight:600;
-  border-radius:10px;
+.tl__sidebar{
+  position:fixed; top:0; left:0; bottom:0; width: 125px;
+  background:#2a2a2d; border-right:1px solid rgba(255,255,255,.08);
+  z-index:25; transform:translateX(0); transition:transform .2s ease;
+  border-right: 1px solid rgba(255,255,255,.08); 
+  display:flex; flex-direction:column;
+  
+}
+
+.tl__content{ padding-left: calc(var(--sidebar-w) + 16px); }
+.tl__sideHeader{
+  height: 80px; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+  border-bottom: 1px solid rgba(255,255,255,.06); /* ⬅️ This is your horizontal line */
+}
+
+.tl__sideSeal{ width:50px; height:50px; border-radius:50%; object-fit: cover; }
+
+.tl__menu{ padding:10px 0; display:flex; flex-direction:column; gap:6px;  }
+.tl__item {
+  display: flex;          /* ensure it's a flex container */
+  flex-direction: column; /* ⬅️ icon over text */
+  align-items: center;    /* center horizontally */
+  text-align: center;     /* center the label text */
+  gap: 6px;               /* space between icon and label */
+  padding: 10px 6px;
 }
 .tl__item:hover{ background:rgba(255,255,255,.06); }
 .tl__item.active{ background:#d5ac16; color:#141414; }
 
-.tl__icon{ width:22px; height:22px; object-fit:contain; }
-
-.tl__logoutBottom{
-  margin-top:auto; margin:12px;
-  display:flex; align-items:center; gap:10px; width:calc(100% - 24px);
-  padding:10px 12px; border-radius:10px; cursor:pointer;
-  color:#e9e9ec; background:#2a2a31; border:1px solid rgba(255,255,255,.10);
-  font-weight:700;
+.tl__icon {
+  width: 22px; height: 22px;
+  display: block;         /* avoids inline baseline wiggle */
 }
-.tl__logoutBottom:hover{ background:#35353b; }
+.tl__item span{
+  font-size: 11px;                       
+  line-height: 1.15;
+  font-weight: 600;
+}
 
+.tl__item.active{ background:#d5ac16; color:#141414; }
+.tl__item:hover{ background: rgba(255,255,255,.08); }
+
+.tl__logoutBottom {
+  display: flex; /* Make sure it's a flex container */
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-align: center;
+  width: 100%; /* ⬅️ Make it full-width */
+  padding: 10px 6px; /* ⬅️ Match the padding of other items */
+  margin: 12px 0 0 0; /* ⬅️ Keep top margin, but remove horizontal centering */
+  background: transparent;
+  border: none;
+  border-radius: 0;  
+  color: #e7e7e7; 
+  cursor: pointer;
+}
+.tl__logoutBottom .tl__icon{ width: 24px; height: 24px; }
+.tl__logoutBottom span{ font-size: 15px; line-height: 1.15; font-weight: 600;}
+.tl__logoutBottom:hover {
+  background: rgba(255, 255, 255, .08);
+}
 /* ===== Content area ===== */
-.tl__content{
-  padding-top:80px;      /* header */
-  padding-left:256px;    /* sidebar */
-  padding-right:16px; 
-  padding-bottom:24px;
-  min-height:100vh;
+.tl__content {
+  padding-left: calc(125px + 24px); 
+  padding-right: 24px; 
+  padding-top: 80px; 
+  padding-bottom: 24px;
+  min-height: 100vh;
 }
-.tl__content--raw{
-  padding: 0;             
+.tl__content--raw{ padding:0; }
+
+/* Stack icon above text for sidebar links */
+.tl__menu a {
+  display: flex;             /* make each link a flex box */
+  flex-direction: column;    /* icon on top, text below */
+  align-items: center;       /* center horizontally */
+  justify-content: center;
+  text-align: center;        /* center the label text */
+  gap: 6px;                  /* space between icon and label */
+  padding: 10px 6px;
+}
+
+/* Size the icons inside those links */
+.tl__menu a img {
+  color:#f9f8f6;
+  width: 28px;
+  height: 28px;
+  display: block;
+}
+
+/* (optional) smaller label text */
+.tl__menu a span {
+  color:#f9f8f6;
+  font-size: 14px;
+  line-height: 1.15;
+  font-weight: 500;
+}
+
+.tl__menu a.active span {
+  color: #141414; /* This matches your .tl__item.active color */
 }
 
 /* ===== Mobile: Drawer sidebar ===== */
 @media (max-width: 900px){
   .tl__burger{ display:inline-flex; }
-  .tl__sidebar{ transform:translateX(-100%); width:280px; }
+  .tl__topbar{ left:0; } 
+  .tl__sidebar{ top:64px; width:280px; transform:translateX(-100%); }
   .tl__sidebar.is-open{ transform:translateX(0); }
   .tl__content{ padding-left:16px; } /* no reserved sidebar space */
   .tl__overlay{ position:fixed; inset:64px 0 0 0; background:rgba(0,0,0,.45); z-index:24; }
+}
+
+
+.tl__menu a img { filter: brightness(0) invert(0.85) opacity(.9); }
+
+/* Keep hover as white */
+.tl__menu a:hover img { 
+  filter: brightness(0) invert(1); 
+}
+
+/* Make active icon black */
+.tl__menu a.active img { 
+  filter: brightness(0); 
 }

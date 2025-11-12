@@ -1,413 +1,447 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
-/** -------- Types -------- */
-type LiveState = {
-  quizId: string;        // id you passed from WaitingRoom (display id or canonical id)
-  title: string;
-  timeLimit: number;     // 15 / 30 / 45
+const API_BASE = "https://knighthoot.app"; 
+const api = (p: string) => `${API_BASE}${p.startsWith("/") ? p : `/${p}`}`;
+
+type HostLocationState = {
+  quizId?: string;
+  title?: string;
+  TID?: number;
   pin?: string;
-  TID?: number;          // optional if you pass it along
+  timeLimit?: number;
+  autoStart?: boolean; 
 };
-type QuestionDTO = { question: string; options: string[] };
 
-/** -------- Helpers -------- */
+type TestDoc = {
+  ID?: string;
+  title?: string;
+  questions?: any[];
+  isLive?: boolean;
+  currentQuestion?: number;
+  currentIndex?: number;
+};
+
 function getAuthHeaders() {
-  const token = localStorage.getItem("token") || localStorage.getItem("jwt");
-  const h: Record<string, string> = {};
-  if (token) {
-    h.Authorization = `Bearer ${token}`;
-    h["x-auth-token"] = token; // handle either style of middleware
-  }
-  return h;
-}
-function pickQuestionText(src: any): string {
-  if (!src) return "";
-  const cand = src.question ?? src.Question ?? src.prompt ?? src.text ?? src.title;
-  return typeof cand === "string" ? cand : "";
+  const token =
+    localStorage.getItem("token") ||
+    localStorage.getItem("jwt") ||
+    sessionStorage.getItem("token");
+  return {
+    "Content-Type": "application/json",
+    ...(token
+      ? {
+          Authorization: `Bearer ${token}`,
+          "x-auth-token": token,
+          "x-access-token": token,
+        }
+      : {}),
+  };
 }
 
-function pickOptions(src: any): string[] {
-  if (!src) return [];
-  const cand = src.options ?? src.Options ?? src.choices ?? src.Choices;
-  return Array.isArray(cand) ? cand : [];
+function textOf(q: any) {
+  return q?.question ?? q?.Question ?? q?.prompt ?? q?.text ?? q?.title ?? "";
 }
-function getTIDRobust(stateTid?: number): number | undefined {
-  if (typeof stateTid === "number" && !Number.isNaN(stateTid)) return stateTid;
+function optsOf(q: any): string[] {
+  const arr = q?.options ?? q?.Options ?? q?.choices ?? q?.Choices;
+  return Array.isArray(arr) ? arr : [];
+}
 
-  for (const k of ["TID", "teacherId", "ID", "id"]) {
-    const v = localStorage.getItem(k);
-    if (v && !Number.isNaN(Number(v))) return Number(v);
+// Try to recover TID from localStorage if not passed via state
+function deriveTID(initial?: number): number | undefined {
+  if (typeof initial === "number") return initial;
+  const keys = ["TID", "tid", "teacherId", "teacherID", "user", "profile"];
+  for (const k of keys) {
+    const v = localStorage.getItem(k) || sessionStorage.getItem(k);
+    if (!v) continue;
+    try {
+      // handle raw number or JSON object
+      if (/^\d+$/.test(v)) return Number(v);
+      const obj = JSON.parse(v);
+      for (const cand of ["TID", "tid", "teacherId", "teacherID", "id"]) {
+        if (typeof obj?.[cand] === "number") return obj[cand];
+        if (typeof obj?.[cand] === "string" && /^\d+$/.test(obj[cand])) return Number(obj[cand]);
+      }
+    } catch {}
   }
-  try {
-    const token = localStorage.getItem("token") || localStorage.getItem("jwt");
-    if (token) {
-      const payload = JSON.parse(atob(token.split(".")[1]));
-      const claim = (import.meta as any).env?.VITE_JWT_USERID_CLAIM || "id";
-      const val = payload?.[claim] ?? payload?.teacherId ?? payload?.ID;
-      if (val !== undefined && !Number.isNaN(Number(val))) return Number(val);
-    }
-  } catch {}
   return undefined;
 }
 
-/** -------- Component -------- */
+// --- detect the correct answer index robustly ---
+function getCorrectIndex(q: any): number {
+  if (!q) return -1;
+  if (typeof q?.correctIndex === "number") return q.correctIndex;
+  if (typeof q?.answerIndex === "number") return q.answerIndex;
+  if (typeof q?.AnswerIndex === "number") return q.AnswerIndex;
+  if (typeof q?.answer === "number") return q.answer;
+
+  const opts = q?.options ?? q?.Options ?? q?.choices ?? q?.Choices ?? [];
+  const ansText = q?.answerText ?? q?.Answer ?? q?.correct ?? q?.Correct ?? "";
+
+  if (typeof ansText === "string" && Array.isArray(opts)) {
+    const idx = opts.findIndex((o: any) => {
+      const t = (o?.text ?? o?.Text ?? o ?? "").toString().trim();
+      return t.localeCompare(ansText.toString().trim(), undefined, { sensitivity: "base" }) === 0;
+    });
+    if (idx >= 0) return idx;
+  }
+  return -1;
+}
+
 export default function HostQuiz() {
   const navigate = useNavigate();
-  const { state } = useLocation();
-  const live = (state ?? {}) as Partial<LiveState>;
+  const s = (useLocation().state || {}) as HostLocationState;
 
-  const routeId = String(live.quizId || "");
-  const title = String(live.title || "Quiz");
-  const timePerQ = Number(live.timeLimit || 30);
-  const stateTid = typeof live.TID === "number" ? live.TID : undefined;
+  const [quizId, setQuizId] = useState<string | undefined>(s.quizId);
+  const [title, setTitle] = useState<string>(s.title || "Hosted Quiz");
+  const [pin] = useState<string | undefined>(s.pin);
+  const [TID, setTID] = useState<number | undefined>(deriveTID(s.TID));
 
-  const [canonicalId, setCanonicalId] = useState<string>(routeId);
-  const [q, setQ] = useState<QuestionDTO | null>(null);
-  const [qIndex, setQIndex] = useState(0);
-  const [total, setTotal] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(timePerQ);
-  const [loading, setLoading] = useState(false);
+  const [started, setStarted] = useState(false);
+  const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const [qIndex, setQIndex] = useState(-1);
+  const [qText, setQText] = useState("");
+  const [choices, setChoices] = useState<string[]>([]);
+  const [total, setTotal] = useState(0);
+
+  // current question + reveal state
+  const [currentQ, setCurrentQ] = useState<any | null>(null);
+  const [reveal, setReveal] = useState(false);
+
+  const [secondsLeft, setSecondsLeft] = useState<number>(s.timeLimit ?? 20);
   const timerRef = useRef<number | null>(null);
+  const startIssuedRef = useRef(false); // prevents duplicate starts
 
-  if (!routeId || !timePerQ) {
-    return (
-      <main className="host-quiz" style={{ minHeight: "100vh", background: "#0f0f10", color: "#fff" }}>
-        <div style={{ padding: 24, textAlign: "center", color: "#ffd84d" }}>
-          Missing quiz data.
-          <div style={{ marginTop: 12 }}>
-            <button className="btn btn--gold" onClick={() => navigate("/dashboard/teacher/start")}>
-              Back to Start
-            </button>
-          </div>
-        </div>
-      </main>
-    );
-  }
+  // ---------- helpers ----------
+  const timeString = useMemo(() => `${Math.max(0, secondsLeft)}s`, [secondsLeft]);
 
-  /** ---- lifecycle: preflight + start-or-resume ---- */
-  useEffect(() => {
-    let cancelled = false;
-
-    async function startOrResume() {
-      setError(null);
-      const TID = getTIDRobust(stateTid);
-      if (!TID) {
-        setError("Missing teacher ID (TID). Please log in again.");
-        return;
-      }
-
-      try {
-        setLoading(true);
-
-        // 0) Preflight: read test to get canonical ID, total, isLive, currentQuestion, and questions
-        const preRes = await fetch(`/api/test/${encodeURIComponent(routeId)}`, {
-          headers: { ...getAuthHeaders() },
-        });
-        if (!preRes.ok) {
-          const body = await preRes.text();
-          setError(`readTest (preflight) failed (HTTP ${preRes.status}): ${body}`);
-          return;
-        }
-        const preJson = await preRes.json();
-
-        const preQuestions: any[] = Array.isArray(preJson?.questions) ? preJson.questions : [];
-        const count = preQuestions.length;
-        const idFromDb: string = String(preJson?.ID ?? routeId);
-        const isLive: boolean = !!(preJson?.isLive ?? preJson?.live ?? preJson?.started);
-        const currentIdxRaw = preJson?.currentQuestion ?? preJson?.currentIndex ?? 0;
-        const currentIdx = Number(currentIdxRaw);
-
-        if (!cancelled) {
-          setCanonicalId(idFromDb);
-          setTotal(count);
-        }
-
-        // If already live, RESUME: render the current question and start timer
-        if (isLive) {
-          if (Number.isFinite(currentIdx) && currentIdx < count && preQuestions[currentIdx]) {
-            const curr = preQuestions[currentIdx];
-            if (!cancelled) {
-              setQ({ question: pickQuestionText(curr), options: pickOptions(curr) });
-              setQIndex(currentIdx);
-              resetTimer();
-            }
-            return;
-          }
-          // Edge: live but pointer beyond last question -> go to review
-          navigate("/dashboard/teacher/review", { state: { quizId: idFromDb, title, finished: true } });
-          return;
-        }
-
-        // Not live yet -> START it now
-        const startRes = await fetch("/api/startTest", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", ...getAuthHeaders() },
-          body: JSON.stringify({ ID: idFromDb, TID }),
-        });
-
-        if (!startRes.ok) {
-          const body = await startRes.text();
-          // If backend reports "already live" (race/refresh), fall back to resume path
-          if (startRes.status === 400 && /already live/i.test(body)) {
-            // show current question from preflight
-            if (Number.isFinite(currentIdx) && currentIdx < count && preQuestions[currentIdx]) {
-              const curr = preQuestions[currentIdx];
-              if (!cancelled) {
-                setQ({ question: pickQuestionText(curr), options: pickOptions(curr) });
-                setQIndex(currentIdx);
-                resetTimer();
-              }
-              return;
-            }
-          }
-          setError(`startTest failed (HTTP ${startRes.status}): ${body}`);
-          return;
-        }
-
-        const startJson = await startRes.json();
-        const startText = pickQuestionText(startJson) || pickQuestionText(preQuestions[0]);
-            const startOpts = pickOptions(startJson).length ? pickOptions(startJson) : pickOptions(preQuestions[0]);
-            if (!startText || !startOpts.length) {
-            setError("startTest returned no usable question/options.");
-            return;
-        }
-        setQ({ question: startText, options: startOpts });
-        if (!cancelled) {
-          setQ({ question: startJson.question, options: startJson.options });
-          setQIndex(0);
-          resetTimer();
-        }
-      } catch (e: any) {
-        setError(e?.message || "Failed to start/resume test.");
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
-
-    startOrResume();
-    return () => {
-      cancelled = true;
-      clearTimer();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [routeId, stateTid]);
-
-  /** ---- timer ---- */
-  function clearTimer() {
-    if (timerRef.current) {
-      window.clearInterval(timerRef.current);
-      timerRef.current = null;
-    }
-  }
-  function resetTimer() {
-    clearTimer();
-    setTimeLeft(timePerQ);
+  function startTimer() {
+    if (timerRef.current) window.clearInterval(timerRef.current);
     timerRef.current = window.setInterval(() => {
-      setTimeLeft((t) => {
-        if (t <= 1) {
-          clearTimer();
-          goNext(true);
-          return 0;
-        }
-        return t - 1;
-      });
+      setSecondsLeft((t) => (t <= 1 ? (window.clearInterval(timerRef.current!), 0) : t - 1) as number);
     }, 1000);
   }
+  function resetTimer() {
+    setSecondsLeft(s.timeLimit ?? 20);
+    startTimer();
+  }
 
-  /** ---- next / skip ---- */
-  async function goNext(_timesUp = false) {
+  async function timerExpiration() {
+    if (busy) return; 
+    setBusy(true);
     setError(null);
-    const TID = getTIDRobust(stateTid);
-    if (!TID) {
-      setError("Missing teacher ID (TID). Please log in again.");
+    setReveal(true); // Reveal answer on teachers screen
+
+    try {
+      if (!quizId || TID == null) return;
+
+      console.log("Timer expired. Calling nextQuestion");
+      const res = await fetch(api(`/api/nextQuestion`), {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ ID: quizId, TID: TID }),
+      });
+
+      let payload: any = null;
+      try {
+        payload = await res.json();
+      } catch {
+      }
+
+      if (!res.ok) {
+        const bodyTxt = typeof payload === "object" ? JSON.stringify(payload) : (await res.text().catch(() => ""));
+        throw new Error(`nextQuestion (on timer) failed (HTTP ${res.status}): ${bodyTxt}`);
+      }
+
+      // End quiz if over
+      if (payload?.gameFinished) {
+        finishAndGo("Test has ended. No more questions.");
+        return; 
+      }
+      
+      // If the game is NOT finished, wait
+    } catch (e: any) {
+      setError(e?.message || "Failed to notify clients on timer expiration.");
+    } finally {
+      // Busy set to false waiting for next to be pressed
+      setBusy(false); 
+    }
+  }
+
+  function finishAndGo(message?: string) {
+    if (timerRef.current) window.clearInterval(timerRef.current);
+    setStarted(false);
+    setReveal(false);
+    // Pass along any useful state; your router already has /dashboard/teacher/finished
+    navigate("/dashboard/teacher/finished", {
+      state: { quizId, title, pin, TID, finished: true, message: message || "Test has finished." },
+      replace: true,
+    });
+  }
+
+  async function readById(id: string): Promise<TestDoc | null> {
+    const r = await fetch(api(`/api/test/${encodeURIComponent(id)}`), {
+      headers: getAuthHeaders(),
+      cache: "no-store",
+    });
+    if (!r.ok) return null;
+    return (await r.json()) as TestDoc;
+  }
+
+  async function readWithRetry(id: string, tries = 3): Promise<TestDoc | null> {
+    for (let i = 0; i < tries; i++) {
+      const doc = await readById(id);
+      if (doc) return doc;
+      await new Promise((r) => setTimeout(r, 250 + i * 250));
+    }
+    return null;
+  }
+
+  function showQuestion(doc: TestDoc) {
+    const arr = Array.isArray(doc.questions) ? doc.questions : [];
+    setTotal(arr.length);
+
+    const idx = Number(doc.currentQuestion ?? doc.currentIndex ?? 0);
+
+    // If we've reached/passed the end, finish
+    if (!arr.length || idx < 0 || idx >= arr.length) {
+      finishAndGo("No more questions.");
       return;
     }
 
+    const curr = arr[idx];
+    setStarted(true);
+    setQIndex(idx);
+    setQText(textOf(curr));
+    setChoices(optsOf(curr));
+    setCurrentQ(curr);
+    setReveal(false); // hide until timer completes
+    resetTimer();
+  }
+
+  // ---------- lifecycle ----------
+  useEffect(() => {
+    if (!quizId && s.quizId) setQuizId(s.quizId);
+    if (s.TID != null && TID == null) setTID(s.TID);
+  }, [s.quizId, s.TID, quizId, TID]);
+
+  // Auto-start when arriving from the waiting room
+  useEffect(() => {
+    if (s.autoStart && !started && !startIssuedRef.current) {
+      onStart();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [s.autoStart, started]);
+
+  useEffect(() => {
+    (async () => {
+      if (!quizId) return;
+      try {
+        const doc = await readById(quizId);
+        if (doc?.title) setTitle(doc.title);
+        if (Array.isArray(doc?.questions)) setTotal(doc.questions.length);
+      } catch {}
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  
+  const timerActionRef = useRef(timerExpiration);
+  useEffect(() => {
+    timerActionRef.current = timerExpiration;
+  }, [timerExpiration]);
+
+  useEffect(() => {
+    if (secondsLeft === 0 && !reveal && started) {
+      timerActionRef.current();
+    }
+  }, [secondsLeft, reveal, started]);
+
+  // ---------- actions ----------
+  async function onStart() {
+    if (busy || startIssuedRef.current) return;
+    setBusy(true);
+    setError(null);
+    startIssuedRef.current = true; // latch immediately
+
     try {
-      setLoading(true);
+      if (!quizId) throw new Error("Missing quiz ID.");
+      if (TID == null) throw new Error("Missing teacher ID (TID).");
 
-      const res = await fetch("/api/nextQuestion", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
-        body: JSON.stringify({ TID, ID: canonicalId }),
-      });
-      if (!res.ok) {
-        const body = await res.text();
-        setError(`nextQuestion failed (HTTP ${res.status}): ${body}`);
-        return;
-      }
+      const pre = await readById(quizId);
+      if (pre?.isLive) {
 
-      const json = await res.json();
-      if (json?.gameFinished) {
-        navigate("/dashboard/teacher/review", {
-          state: { quizId: canonicalId, title, finished: true },
+        await fetch(api(`/api/endTest`), {
+          method: "POST",
+          headers: getAuthHeaders(),
+          body: JSON.stringify({ ID: quizId, TID }),
         });
-        return;
       }
 
-      const currentIndex: number = Number(json?.currentQuestion ?? NaN);
-      if (Number.isNaN(currentIndex)) {
-        setError("nextQuestion did not return a valid currentQuestion index.");
-        return;
-      }
-
-      // Read the test and show that index
-      const testRes = await fetch(`/api/test/${encodeURIComponent(canonicalId)}`, {
-        headers: { ...getAuthHeaders() },
+      // Start the test
+      const res = await fetch(api(`/api/startTest`), {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ ID: quizId, TID }),
       });
-      if (!testRes.ok) {
-        const body = await testRes.text();
-        setError(`readTest failed (HTTP ${testRes.status}): ${body}`);
-        return;
+
+      if (!res.ok) {
+        const body = await res.text().catch(() => "");
+        // If server 500s (e.g., race condition), try reading; if live, proceed
+        if (res.status >= 500) {
+          const fallback = await readWithRetry(quizId, 3);
+          if (fallback?.isLive) {
+            showQuestion(fallback);
+            return;
+          }
+        }
+        throw new Error(`startTest failed (HTTP ${res.status}): ${body}`);
       }
 
-      const testJson = await testRes.json();
-      const arr: any[] = Array.isArray(testJson?.questions) ? testJson.questions : [];
-      const nextQ = arr[currentIndex];
-      if (!nextQ) {
-        setError(`Question ${currentIndex + 1} not found in test.`);
-        return;
-      }
-
-      setQ({ question: pickQuestionText(nextQ), options: pickOptions(nextQ) });
-
-      setQIndex(currentIndex);
-      setTotal(arr.length); // in case it changed
-      resetTimer();
+      // 2) Read the fresh test doc 
+      const doc = await readWithRetry(quizId, 3);
+      if (!doc) throw new Error("Could not read quiz right after start.");
+      showQuestion(doc);
+      
     } catch (e: any) {
-      setError(e?.message || "Failed to advance question.");
+      setError(e?.message || "Failed to start.");
+      startIssuedRef.current = false;
     } finally {
-      setLoading(false);
+      setBusy(false);
     }
   }
 
-  const progressLabel = useMemo(
-    () => `Question ${qIndex + 1} of ${total || "?"}`,
-    [qIndex, total]
+  async function onNext() {
+    if (busy) return;
+    setBusy(true);
+    setError(null);
+    try {
+      if (!quizId) throw new Error("Missing quiz ID.");
+
+      // Read quiz to display
+      const doc = await readWithRetry(quizId, 3);
+      if (!doc) throw new Error("Could not load next question.");
+      
+      showQuestion(doc); // Reset timer
+    } catch (e: any) {
+      setError(e?.message || "Failed to display next question.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function onEnd() {
+    console.log("TEACHER CLICKED END. Calling /api/endTest...");
+    if (busy) return;
+    setBusy(true);
+    setError(null);
+    try {
+      if (!quizId || TID == null) return;
+      const res = await fetch(api(`/api/endTest`), {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ ID: quizId, TID }),
+      });
+      if (!res.ok) {
+        const body = await res.text().catch(() => "");
+        throw new Error(`endTest failed (HTTP ${res.status}): ${body}`);
+      }
+      finishAndGo("Test ended by teacher.");
+    } catch (e: any) {
+      setError(e?.message || "Failed to end.");
+    } finally {
+      setBusy(false);
+      startIssuedRef.current = false;
+    }
+  }
+
+  // ---------- UI ----------
+  const Header = (
+    <header style={{ display: "flex", alignItems: "baseline", gap: 12, flexWrap: "wrap" }}>
+      <h2 style={{ margin: 0 }}>{title}</h2>
+      {pin ? <span className="muted">Code: {pin}</span> : null}
+      {quizId ? <span className="muted">ID: {quizId}</span> : null}
+    </header>
   );
 
-  /** ---- render ---- */
+  const correctIdx = useMemo(() => getCorrectIndex(currentQ), [currentQ]);
+
   return (
-    <main className="host-quiz" style={{ minHeight: "100vh", background: "#0f0f10", color: "#fff" }}>
-      <header
-        className="host-topbar"
-        style={{
-          height: 64,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "0 16px",
-          borderBottom: "1px solid rgba(255,216,77,.25)",
-        }}
-      >
-        <div style={{ fontWeight: 700, color: "#ffd84d" }}>
-          Knighthoot <span style={{ color: "#c9c9c9", fontWeight: 500 }}>| {title}</span>
-        </div>
+    <main className="host-page" style={{ padding: 20, minHeight: '80vh' }}>
+      <section className="host-card" style={{ maxHeight: 1200, maxWidth: 1500, margin: "0 auto" }}>
+        {Header}
+        {error ? (
+          <p style={{ color: "#c0392b", marginTop: 12, whiteSpace: "pre-wrap" }}>{error}</p>
+        ) : (
+          <>
+            <div style={{ marginTop: 16 }}>
+              <div className="timer" style={{ fontSize: 24, fontWeight: 700 }}>{timeString}</div>
+              <h3 style={{ margin: "12px 0" }}>{started ? qText || "…" : "Ready to start"}</h3>
 
-        <div className="host-actions">
-          <button
-            className="btn btn--ghost"
-            onClick={() => goNext(false)}
-            disabled={loading}
-            style={{
-              background: "#2b2b2b",
-              border: "1px solid #3a3a3a",
-              color: "#fff",
-              padding: "8px 14px",
-              borderRadius: 8,
-              cursor: "pointer",
-            }}
-          >
-            Skip →
-          </button>
-        </div>
-      </header>
-
-      <section
-        className="host-stage"
-        style={{
-          display: "grid",
-          gridTemplateColumns: "280px 1fr",
-          gap: 24,
-          maxWidth: 1200,
-          margin: "0 auto",
-          padding: "24px 16px 48px",
-        }}
-      >
-        {/* Left: timer + progress + error */}
-        <aside className="host-side">
-          <div
-            className="host-timer"
-            aria-label="seconds remaining"
-            style={{
-              width: 64,
-              height: 64,
-              borderRadius: "50%",
-              background: "#ffd84d",
-              color: "#1b1b1b",
-              fontWeight: 800,
-              display: "grid",
-              placeItems: "center",
-              fontSize: 20,
-              border: "2px solid #1b1b1b",
-              boxShadow: "0 0 0 3px rgba(255,216,77,.2)",
-            }}
-          >
-            {timeLeft}
-          </div>
-          <div style={{ marginTop: 10, color: "#bfbfbf" }}>{progressLabel}</div>
-
-          {error && (
-            <div style={{ color: "#ff9b9b", marginTop: 12, fontSize: 14, whiteSpace: "pre-wrap" }}>
-              {error}
-            </div>
-          )}
-        </aside>
-
-        {/* Right: question + 4 options */}
-        <div className="host-question" style={{ textAlign: "center" }}>
-          <h1 style={{ fontSize: 36, margin: "12px 0 24px" }}>
-            {q?.question ?? "Loading..."}
-          </h1>
-
-          <div
-            className="host-grid"
-            style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}
-          >
-            {(q?.options ?? new Array(4).fill("")).slice(0, 4).map((opt, i) => (
-              <button
-                key={i}
-                className={`host-opt host-opt--${i % 2 ? "grey" : "gold"}`}
-                disabled
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 16,
-                  borderRadius: 10,
-                  padding: "18px 18px",
-                  border: "1px solid",
-                  cursor: "default",
-                  textAlign: "left",
-                  fontSize: 18,
-                  background: i % 2 ? "#aab0b6" : "#e3b30f",
-                  borderColor: i % 2 ? "#8e949a" : "#c39b0e",
-                  color: "#0f0f10",
-                }}
-              >
-                <span
-                  className="host-opt__icon"
-                  aria-hidden
-                  style={{ width: 36, display: "inline-grid", placeItems: "center" }}
+              {started && (
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: 12,
+                    marginTop: 12,
+                  }}
                 >
-                  🛡️
-                </span>
-                <span className="host-opt__text">{opt}</span>
-              </button>
-            ))}
-          </div>
-        </div>
+                  {choices.slice(0, 4).map((opt, i) => {
+                    const isCorrect = reveal && i === correctIdx;
+                    return (
+                      <div
+                        key={i}
+                        className={`host-opt ${isCorrect ? "option--correct" : ""}`}
+                        aria-checked={isCorrect ? "true" : "false"}
+                        data-correct={isCorrect ? "true" : "false"}
+                        style={{
+                          border: "1px solid #ddd",
+                          padding: "10px 12px",
+                          borderRadius: 10,
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 10,
+                        }}
+                      >
+                        <span aria-hidden>🛡️</span>
+                        <span>{opt}</span>
+                        {isCorrect && <span className="option-check">✓ Correct</span>}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {total ? (
+                <p className="muted" style={{ marginTop: 8 }}>
+                  {started ? `Question ${qIndex + 1} of ${total}` : `${total} questions`}
+                </p>
+              ) : null}
+            </div>
+
+            <div style={{ display: "flex", gap: 8, marginTop: 20 }}>
+              {!started ? (
+                <button className="btn" onClick={onStart} disabled={busy}>
+                  {busy ? "Starting…" : "Start"}
+                </button>
+              ) : (
+                <>
+                  {/* Only allow Next after reveal */}
+                  { (qIndex < total - 1) && (
+                    <button className="btn" onClick={onNext} disabled={busy || !reveal}>
+                      {busy ? "…" : "Next"}
+                    </button>
+                  )}
+                  <button className="btn danger" onClick={onEnd} disabled={busy}>
+                    End
+                  </button>
+                </>
+              )}
+            </div>
+          </>
+        )}
       </section>
     </main>
   );

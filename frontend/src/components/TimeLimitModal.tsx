@@ -7,7 +7,7 @@ type Props = {
   defaultValue?: number;
 };
 
-const OPTIONS = [15, 30, 45];
+const OPTIONS = [7, 30, 45];
 
 export default function TimeLimitModal({
   open,

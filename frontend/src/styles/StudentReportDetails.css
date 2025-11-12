@@ -1,0 +1,174 @@
+/* site background already on <main class="site-bg"> */
+.site-bg {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.reports-detail-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px;
+  width: 100%;
+  min-height: 100vh;
+  box-sizing: border-box;
+  background-color: #f4f4f9;
+}
+
+.reports-detail-card {
+  width: 100%;
+  max-width: 800px;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 24px 32px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.reports-detail-top {
+  border-bottom: 1px solid #eee;
+  padding-bottom: 16px;
+  margin-bottom: 24px;
+}
+
+.reports-detail-top h2 {
+  margin: 12px 0 8px;
+  font-size: 2.25rem;
+  color: #333;
+}
+
+.reports-detail-top .summary {
+  font-size: 1.25rem;
+  color: #555;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 500;
+}
+
+.back-btn {
+  background: none;
+  border: 1px solid #ddd;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #555;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+.back-btn:hover {
+  background: #f9f9f9;
+  border-color: #ccc;
+}
+
+/* From Reports page, good to reuse */
+.chip {
+  display: inline-block;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 16px;
+  background-color: #eef2ff;
+  color: #4338ca;
+}
+.reports-detail-top .summary .chip {
+  font-size: 1rem;
+  padding: 6px 12px;
+}
+
+/* List of results */
+.results-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.result-item {
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.result-qtext {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 16px;
+  display: flex;
+  gap: 8px;
+}
+
+.result-choices {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.result-choice {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  border: 2px solid #eee;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.choice-index {
+  font-weight: 700;
+  margin-right: 12px;
+  color: #666;
+}
+.choice-text {
+  flex: 1;
+}
+.choice-icon {
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+/* --- Answer Styling --- */
+
+/* Correct Answer */
+.result-choice.is-correct {
+  border-color: #22c55e;
+  background-color: #f0fdf4;
+  color: #166534;
+}
+.result-choice.is-correct .choice-index {
+  color: #166534;
+}
+.result-choice.is-correct .choice-icon {
+  color: #22c55e;
+} 
+
+/* Wrong Answer (that was selected) */
+.result-choice.is-wrong {
+  border-color: #ef4444;
+  background-color: #fef2f2;
+  color: #991b1b;
+  text-decoration: line-through;
+}
+.result-choice.is-wrong .choice-index {
+  color: #991b1b;
+}
+.result-choice.is-wrong .choice-icon {
+  color: #ef4444;
+}
+
+/* Unanswered question */
+.result-unanswered {
+  margin-top: 12px;
+  font-style: italic;
+  color: #777;
+  padding: 8px 12px;
+  background: #f9f9f9;
+  border-radius: 6px;
+}

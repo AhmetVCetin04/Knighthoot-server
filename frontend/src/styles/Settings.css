@@ -1,0 +1,157 @@
+/* Page layout */
+.settings-page {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 24px 16px 64px;
+  display: flex;
+  flex-direction: column;
+  background-color: #1A1A1A !important;
+  min-height: 100vh;
+  gap: 24px;
+}
+
+.settings-header h1 {
+  font-size: 1.75rem;
+  margin-bottom: 4px;
+}
+
+.settings-sub {
+  color: #6b7280; /* muted gray */
+}
+
+/* Cards */
+.settings-card {
+  background: #111827 !important;          /* dark panel (nice in dark mode), tweak if needed */
+  color: #e5e7eb;
+  border: 1px solid #1f2937 !important;
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.settings-card h2 {
+  font-size: 1.25rem;
+  margin-bottom: 4px;
+}
+
+.settings-card.danger {
+  border-color: #7f1d1d;
+  background: #181112;
+}
+
+/* Alerts */
+.settings-alert {
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 0.95rem;
+}
+
+.settings-alert.ok {
+  background: #052e1a;
+  color: #bbf7d0;
+  border: 1px solid #166534;
+}
+
+.settings-alert.error {
+  background: #2a0c0c;
+  color: #fecaca;
+  border: 1px solid #7f1d1d;
+}
+
+/* Form */
+/* Find and replace these rules */
+
+/* Form / Key-Value Structure */
+.settings-form {
+  display: flex; /* Use flex instead of grid for clean stacking */
+  flex-direction: column;
+  gap: 16px; /* Spacing between key-value pairs */
+}
+
+.settings-label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px; /* Small gap between Key (muted) and Value */
+  font-size: 1.05rem; /* Standard value font size */
+}
+
+.settings-label .muted {
+  font-size: 0.9rem; /* Smaller, muted font for the key */
+  color: #9ca3af;
+  font-weight: 400;
+}
+
+.settings-input {
+  height: 44px;
+  border-radius: 10px;
+  border: 1px solid #374151;
+  background: #0b1220 !important;
+  color: #e5e7eb;
+  padding: 0 12px;
+  outline: none;
+}
+
+.settings-input:focus {
+  border-color: #1a1a1a !important; /* subtle indigo focus */
+  box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.2);
+}
+
+/* Buttons */
+.primary-btn {
+  height: 44px;
+  border: none;
+  border-radius: 10px;
+  padding: 0 16px;
+  font-weight: 600;
+  cursor: pointer;
+  background: #d5ac16 !important;
+  color: #141414 !important;
+}
+
+.primary-btn:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+.ghost-btn {
+  border: 1px solid #374151;
+  background: transparent;
+  color: #cbd5e1;
+  height: 36px;
+  border-radius: 8px;
+  padding: 0 10px;
+  cursor: pointer;
+}
+
+.danger-btn {
+  height: 44px;
+  border: 1px solid #ef4444;
+  background: #991b1b;
+  color: #fff;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  width: fit-content;
+  padding: 0 16px;
+}
+
+.pwd-wrap {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.muted {
+  color: #9ca3af;
+}
+
+.otp-hint {
+  font-size: 0.9rem;
+  color: #9ca3af;
+  border-top: 1px dashed #30363d;
+  padding-top: 10px;
+}
